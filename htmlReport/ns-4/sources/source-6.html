@@ -1,0 +1,177 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > RabbitMQConfig</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.tx.outsourcingmis.config</a>
+</div>
+
+<h1>Coverage Summary for Class: RabbitMQConfig (com.tx.outsourcingmis.config)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">RabbitMQConfig</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (7/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (15/15)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">RabbitMQConfig$$SpringCGLIB$$0</td>
+  </tr>
+  <tr>
+    <td class="name">RabbitMQConfig$$SpringCGLIB$$FastClass$$0</td>
+  </tr>
+  <tr>
+    <td class="name">RabbitMQConfig$$SpringCGLIB$$FastClass$$1</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (7/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (15/15)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.tx.outsourcingmis.config;
+&nbsp;
+&nbsp;import org.springframework.amqp.core.*;
+&nbsp;import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
+&nbsp;import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+&nbsp;import org.springframework.amqp.rabbit.core.RabbitTemplate;
+&nbsp;import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+&nbsp;import org.springframework.amqp.support.converter.MessageConverter;
+&nbsp;import org.springframework.context.annotation.Bean;
+&nbsp;import org.springframework.context.annotation.Configuration;
+&nbsp;
+&nbsp;@Configuration
+<b class="fc">&nbsp;public class RabbitMQConfig {</b>
+&nbsp;
+&nbsp;    public static final String APPROVAL_QUEUE = &quot;approval.notification.queue&quot;;
+&nbsp;    public static final String APPROVAL_EXCHANGE = &quot;approval.notification.exchange&quot;;
+&nbsp;    public static final String APPROVAL_ROUTING_KEY = &quot;approval.notification&quot;;
+&nbsp;
+&nbsp;    @Bean
+&nbsp;    public Queue approvalQueue() {
+<b class="fc">&nbsp;        return QueueBuilder.durable(APPROVAL_QUEUE).build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Bean
+&nbsp;    public DirectExchange approvalExchange() {
+<b class="fc">&nbsp;        return new DirectExchange(APPROVAL_EXCHANGE);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Bean
+&nbsp;    public Binding approvalBinding() {
+<b class="fc">&nbsp;        return BindingBuilder</b>
+<b class="fc">&nbsp;                .bind(approvalQueue())</b>
+<b class="fc">&nbsp;                .to(approvalExchange())</b>
+<b class="fc">&nbsp;                .with(APPROVAL_ROUTING_KEY);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Bean
+&nbsp;    public MessageConverter messageConverter() {
+<b class="fc">&nbsp;        return new Jackson2JsonMessageConverter();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Bean
+&nbsp;    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
+<b class="fc">&nbsp;        RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);</b>
+<b class="fc">&nbsp;        rabbitTemplate.setMessageConverter(messageConverter());</b>
+<b class="fc">&nbsp;        return rabbitTemplate;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Bean
+&nbsp;    public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
+&nbsp;            ConnectionFactory connectionFactory) {
+<b class="fc">&nbsp;        SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();</b>
+<b class="fc">&nbsp;        factory.setConnectionFactory(connectionFactory);</b>
+<b class="fc">&nbsp;        factory.setMessageConverter(messageConverter());</b>
+<b class="fc">&nbsp;        return factory;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-06-15 16:56</div>
+</div>
+</body>
+</html>

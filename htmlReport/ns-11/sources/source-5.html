@@ -1,0 +1,104 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > RolePermissionMapper</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.tx.outsourcingmis.mapper</a>
+</div>
+
+<h1>Coverage Summary for Class: RolePermissionMapper (com.tx.outsourcingmis.mapper)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">RolePermissionMapper$MockitoMock$rhFkf7Cl</td>
+  </tr>
+  <tr>
+    <td class="name">RolePermissionMapper$MockitoMock$rhFkf7Cl$auxiliary$mFCloV0F</td>
+  </tr>
+  <tr>
+    <td class="name">RolePermissionMapper$MockitoMock$rhFkf7Cl$auxiliary$QdMQoV7K</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.tx.outsourcingmis.mapper;
+&nbsp;
+&nbsp;import org.apache.ibatis.annotations.Mapper;
+&nbsp;import org.apache.ibatis.annotations.Select;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;@Mapper
+&nbsp;public interface RolePermissionMapper {
+&nbsp;
+&nbsp;    // 根据角色名查询权限码
+&nbsp;    @Select(&quot;SELECT DISTINCT p.permission_code &quot; +
+&nbsp;            &quot;FROM role r &quot; +
+&nbsp;            &quot;LEFT JOIN role_permission rp ON rp.role_id = r.id &quot; +
+&nbsp;            &quot;LEFT JOIN permission p ON rp.permission_id = p.id &quot; +
+&nbsp;            &quot;WHERE r.role_name = #{role} AND p.permission_code IS NOT NULL&quot;)
+&nbsp;    List&lt;String&gt; getPermissionsByRole(String role);
+&nbsp;
+&nbsp;    // 根据用户ID查询权限码
+&nbsp;    @Select(&quot;SELECT DISTINCT p.permission_code &quot; +
+&nbsp;            &quot;FROM user u &quot; +
+&nbsp;            &quot;LEFT JOIN user_role ur ON ur.user_id = u.id &quot; +
+&nbsp;            &quot;LEFT JOIN role r ON ur.role_id = r.id &quot; +
+&nbsp;            &quot;LEFT JOIN role_permission rp ON rp.role_id = r.id &quot; +
+&nbsp;            &quot;LEFT JOIN permission p ON rp.permission_id = p.id &quot; +
+&nbsp;            &quot;WHERE u.id = #{userId} AND p.permission_code IS NOT NULL&quot;)
+&nbsp;    List&lt;String&gt; getPermissionsByUserId(Long userId);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-06-15 16:56</div>
+</div>
+</body>
+</html>

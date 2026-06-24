@@ -1,0 +1,202 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > CustomElasticsearchHealthIndicator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.tx.outsourcingmis.config</a>
+</div>
+
+<h1>Coverage Summary for Class: CustomElasticsearchHealthIndicator (com.tx.outsourcingmis.config)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CustomElasticsearchHealthIndicator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    66.7%
+  </span>
+  <span class="absValue">
+    (2/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    7.7%
+  </span>
+  <span class="absValue">
+    (3/39)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.tx.outsourcingmis.config;
+&nbsp;
+&nbsp;import co.elastic.clients.elasticsearch.ElasticsearchClient;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.boot.actuate.health.Health;
+&nbsp;import org.springframework.boot.actuate.health.HealthIndicator;
+&nbsp;import org.springframework.stereotype.Component;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;
+&nbsp;/**
+&nbsp; * 自定义 Elasticsearch 健康检查
+&nbsp; * 使用手动配置的 ElasticsearchClient（已跳过SSL验证）
+&nbsp; *
+&nbsp; */
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;@Component
+&nbsp;public class CustomElasticsearchHealthIndicator implements HealthIndicator {
+&nbsp;
+&nbsp;    private final ElasticsearchClient elasticsearchClient;
+&nbsp;
+<b class="fc">&nbsp;    public CustomElasticsearchHealthIndicator(ElasticsearchClient elasticsearchClient) {</b>
+<b class="fc">&nbsp;        this.elasticsearchClient = elasticsearchClient;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Health health() {
+&nbsp;        // 检查客户端是否初始化成功
+<b class="nc">&nbsp;        if (elasticsearchClient == null) {</b>
+<b class="nc">&nbsp;            log.warn(&quot;Elasticsearch客户端未初始化，跳过健康检查&quot;);</b>
+<b class="nc">&nbsp;            return Health.unknown()</b>
+<b class="nc">&nbsp;                    .withDetail(&quot;reason&quot;, &quot;ElasticsearchClient未初始化&quot;)</b>
+<b class="nc">&nbsp;                    .withDetail(&quot;status&quot;, &quot;client_not_available&quot;)</b>
+<b class="nc">&nbsp;                    .build();</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        try {
+&nbsp;            // 尝试执行 ping 操作
+<b class="nc">&nbsp;            boolean isConnected = elasticsearchClient.ping().value();</b>
+&nbsp;
+<b class="nc">&nbsp;            if (isConnected) {</b>
+<b class="nc">&nbsp;                log.debug(&quot;Elasticsearch健康检查通过&quot;);</b>
+&nbsp;
+&nbsp;                // 获取ES版本信息（可选）
+<b class="nc">&nbsp;                String version = null;</b>
+&nbsp;                try {
+<b class="nc">&nbsp;                    var info = elasticsearchClient.info();</b>
+<b class="nc">&nbsp;                    version = info.version().number();</b>
+&nbsp;                } catch (Exception e) {
+<b class="nc">&nbsp;                    log.debug(&quot;获取ES版本信息失败: {}&quot;, e.getMessage());</b>
+&nbsp;                }
+&nbsp;
+<b class="nc">&nbsp;                Health.Builder builder = Health.up()</b>
+<b class="nc">&nbsp;                        .withDetail(&quot;service&quot;, &quot;Elasticsearch&quot;)</b>
+<b class="nc">&nbsp;                        .withDetail(&quot;status&quot;, &quot;connected&quot;)</b>
+<b class="nc">&nbsp;                        .withDetail(&quot;using&quot;, &quot;custom_client_with_ssl_disabled&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;                if (version != null) {</b>
+<b class="nc">&nbsp;                    builder.withDetail(&quot;version&quot;, version);</b>
+&nbsp;                }
+&nbsp;
+<b class="nc">&nbsp;                return builder.build();</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                log.warn(&quot;Elasticsearch ping 返回 false&quot;);</b>
+<b class="nc">&nbsp;                return Health.down()</b>
+<b class="nc">&nbsp;                        .withDetail(&quot;reason&quot;, &quot;Ping 返回 false&quot;)</b>
+<b class="nc">&nbsp;                        .withDetail(&quot;status&quot;, &quot;not_responding&quot;)</b>
+<b class="nc">&nbsp;                        .build();</b>
+&nbsp;            }
+&nbsp;
+&nbsp;        } catch (IOException e) {
+<b class="nc">&nbsp;            log.error(&quot;Elasticsearch健康检查失败: {}&quot;, e.getMessage());</b>
+<b class="nc">&nbsp;            return Health.down()</b>
+<b class="nc">&nbsp;                    .withDetail(&quot;reason&quot;, e.getMessage())</b>
+<b class="nc">&nbsp;                    .withDetail(&quot;error_type&quot;, e.getClass().getSimpleName())</b>
+<b class="nc">&nbsp;                    .withDetail(&quot;status&quot;, &quot;connection_error&quot;)</b>
+<b class="nc">&nbsp;                    .build();</b>
+&nbsp;        } catch (Exception e) {
+<b class="nc">&nbsp;            log.error(&quot;Elasticsearch健康检查异常: {}&quot;, e.getMessage());</b>
+<b class="nc">&nbsp;            return Health.down()</b>
+<b class="nc">&nbsp;                    .withDetail(&quot;reason&quot;, &quot;Unexpected error: &quot; + e.getMessage())</b>
+<b class="nc">&nbsp;                    .withDetail(&quot;error_type&quot;, e.getClass().getSimpleName())</b>
+<b class="nc">&nbsp;                    .build();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-06-15 16:56</div>
+</div>
+</body>
+</html>

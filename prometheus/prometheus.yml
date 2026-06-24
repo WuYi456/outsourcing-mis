@@ -1,0 +1,28 @@
+# Prometheus 配置文件
+# 位置：./prometheus/prometheus.yml
+# 定义指标采集目标和采集规则
+
+global:
+  scrape_interval: 15s          # 全局默认采集间隔
+  evaluation_interval: 15s      # 告警规则评估间隔
+  external_labels:
+    monitor: 'outsourcing-mis'  # 全局标签，标识监控系统
+
+scrape_configs:
+  # Spring Boot 应用指标采集
+  - job_name: 'spring-boot-app'
+    metrics_path: '/actuator/prometheus'  # 指标暴露路径
+    scrape_interval: 10s                  # 应用指标采集间隔（更频繁）
+    static_configs:
+      - targets: ['host.docker.internal:8080']  # 宿主机应用地址
+        labels:
+          application: 'outsourcing-mis'        # 应用名称标签
+          environment: 'dev'                    # 环境标签
+
+  # Node Exporter 采集（宿主机系统监控）
+  - job_name: 'node-exporter'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['node-exporter:9100']         # Node Exporter 默认端口
+        labels:
+          service: 'node-exporter'              # 服务标识

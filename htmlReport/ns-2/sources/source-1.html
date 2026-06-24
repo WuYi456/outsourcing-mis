@@ -1,0 +1,231 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > MonitorMetricsAspect</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.tx.outsourcingmis.aspect</a>
+</div>
+
+<h1>Coverage Summary for Class: MonitorMetricsAspect (com.tx.outsourcingmis.aspect)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MonitorMetricsAspect</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    62.5%
+  </span>
+  <span class="absValue">
+    (5/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    83.3%
+  </span>
+  <span class="absValue">
+    (5/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    88.9%
+  </span>
+  <span class="absValue">
+    (32/36)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.tx.outsourcingmis.aspect;
+&nbsp;
+&nbsp;import com.tx.outsourcingmis.config.MetricsConfig;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.aspectj.lang.ProceedingJoinPoint;
+&nbsp;import org.aspectj.lang.annotation.Around;
+&nbsp;import org.aspectj.lang.annotation.Aspect;
+&nbsp;import org.aspectj.lang.annotation.Pointcut;
+&nbsp;import org.aspectj.lang.reflect.MethodSignature;
+&nbsp;import org.springframework.stereotype.Component;
+&nbsp;
+&nbsp;import java.util.concurrent.TimeUnit;
+&nbsp;
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;@Aspect
+&nbsp;@Component
+<b class="fc">&nbsp;@RequiredArgsConstructor</b>
+&nbsp;public class MonitorMetricsAspect {
+&nbsp;
+&nbsp;    private final MetricsConfig metricsConfig;
+&nbsp;
+&nbsp;    // 切点：Controller层所有方法
+&nbsp;    @Pointcut(&quot;@within(org.springframework.web.bind.annotation.RestController) || &quot; +
+&nbsp;            &quot;@within(org.springframework.stereotype.Controller)&quot;)
+<b class="nc">&nbsp;    public void controllerMethods() {}</b>
+&nbsp;
+&nbsp;    // 切点：Service层所有方法
+&nbsp;    @Pointcut(&quot;@within(org.springframework.stereotype.Service)&quot;)
+<b class="nc">&nbsp;    public void serviceMethods() {}</b>
+&nbsp;
+&nbsp;    // 切点：Mapper层所有方法
+&nbsp;    @Pointcut(&quot;@within(org.apache.ibatis.annotations.Mapper)&quot;)
+<b class="nc">&nbsp;    public void mapperMethods() {}</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 监控Controller方法执行时间
+&nbsp;     */
+&nbsp;    @Around(&quot;controllerMethods()&quot;)
+&nbsp;    public Object monitorController(ProceedingJoinPoint joinPoint) throws Throwable {
+<b class="fc">&nbsp;        String className = joinPoint.getTarget().getClass().getSimpleName();</b>
+<b class="fc">&nbsp;        String methodName = joinPoint.getSignature().getName();</b>
+<b class="fc">&nbsp;        String apiName = className + &quot;.&quot; + methodName;</b>
+&nbsp;
+<b class="fc">&nbsp;        long startTime = System.nanoTime();</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            Object result = joinPoint.proceed();</b>
+<b class="fc">&nbsp;            long duration = System.nanoTime() - startTime;</b>
+&nbsp;
+&nbsp;            // 记录API耗时
+<b class="fc">&nbsp;            metricsConfig.recordApiDuration(apiName, duration, TimeUnit.NANOSECONDS);</b>
+&nbsp;
+&nbsp;            // 超过500ms打印警告
+<b class="pc">&nbsp;            if (TimeUnit.NANOSECONDS.toMillis(duration) &gt; 500) {</b>
+<b class="nc">&nbsp;                log.warn(&quot;⚠️ 慢API告警: {} 耗时 {}ms&quot;, apiName, TimeUnit.NANOSECONDS.toMillis(duration));</b>
+&nbsp;            }
+&nbsp;
+<b class="fc">&nbsp;            return result;</b>
+&nbsp;        } catch (Exception e) {
+<b class="fc">&nbsp;            long duration = System.nanoTime() - startTime;</b>
+<b class="fc">&nbsp;            metricsConfig.recordApiDuration(apiName, duration, TimeUnit.NANOSECONDS);</b>
+<b class="fc">&nbsp;            metricsConfig.recordBusinessEvent(&quot;api_error&quot;, e.getClass().getSimpleName(), null);</b>
+&nbsp;            throw e;
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 监控Service方法执行时间
+&nbsp;     */
+&nbsp;    @Around(&quot;serviceMethods()&quot;)
+&nbsp;    public Object monitorService(ProceedingJoinPoint joinPoint) throws Throwable {
+<b class="fc">&nbsp;        String methodName = joinPoint.getSignature().toShortString();</b>
+<b class="fc">&nbsp;        long startTime = System.nanoTime();</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            Object result = joinPoint.proceed();</b>
+<b class="fc">&nbsp;            long duration = System.nanoTime() - startTime;</b>
+&nbsp;
+&nbsp;            // 超过1秒的Service调用记录慢调用
+<b class="fc">&nbsp;            if (TimeUnit.NANOSECONDS.toMillis(duration) &gt; 1000) {</b>
+<b class="fc">&nbsp;                log.warn(&quot;⚠️ 慢Service调用: {} 耗时 {}ms&quot;, methodName, TimeUnit.NANOSECONDS.toMillis(duration));</b>
+&nbsp;            }
+<b class="fc">&nbsp;            return result;</b>
+&nbsp;        } catch (Exception e) {
+&nbsp;            throw e;
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 监控Mapper方法执行时间（监控数据库查询）
+&nbsp;     */
+&nbsp;    @Around(&quot;mapperMethods()&quot;)
+&nbsp;    public Object monitorMapper(ProceedingJoinPoint joinPoint) throws Throwable {
+<b class="fc">&nbsp;        MethodSignature signature = (MethodSignature) joinPoint.getSignature();</b>
+<b class="fc">&nbsp;        String sqlMethod = signature.getDeclaringType().getSimpleName() + &quot;.&quot; + signature.getName();</b>
+&nbsp;
+<b class="fc">&nbsp;        long startTime = System.nanoTime();</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            Object result = joinPoint.proceed();</b>
+<b class="fc">&nbsp;            long duration = System.nanoTime() - startTime;</b>
+<b class="fc">&nbsp;            long durationMs = TimeUnit.NANOSECONDS.toMillis(duration);</b>
+&nbsp;
+<b class="fc">&nbsp;            metricsConfig.recordDbQueryDuration(sqlMethod, duration, TimeUnit.NANOSECONDS);</b>
+&nbsp;
+&nbsp;            // 慢查询检测（超过1000ms）
+<b class="fc">&nbsp;            if (durationMs &gt; 1000) {</b>
+<b class="fc">&nbsp;                metricsConfig.recordSlowQuery(sqlMethod, durationMs);</b>
+<b class="fc">&nbsp;                log.warn(&quot;⚠️ 慢SQL告警: {} 耗时 {}ms&quot;, sqlMethod, durationMs);</b>
+&nbsp;            }
+&nbsp;
+<b class="fc">&nbsp;            return result;</b>
+&nbsp;        } catch (Exception e) {
+&nbsp;            throw e;
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-06-15 16:56</div>
+</div>
+</body>
+</html>

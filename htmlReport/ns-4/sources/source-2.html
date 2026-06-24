@@ -1,0 +1,249 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > ElasticsearchConfig</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.tx.outsourcingmis.config</a>
+</div>
+
+<h1>Coverage Summary for Class: ElasticsearchConfig (com.tx.outsourcingmis.config)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ElasticsearchConfig</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (2/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    86.5%
+  </span>
+  <span class="absValue">
+    (32/37)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ElasticsearchConfig$$SpringCGLIB$$0</td>
+  </tr>
+  <tr>
+    <td class="name">ElasticsearchConfig$$SpringCGLIB$$FastClass$$0</td>
+  </tr>
+  <tr>
+    <td class="name">ElasticsearchConfig$$SpringCGLIB$$FastClass$$1</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (2/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    86.5%
+  </span>
+  <span class="absValue">
+    (32/37)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.tx.outsourcingmis.config;
+&nbsp;
+&nbsp;import co.elastic.clients.elasticsearch.ElasticsearchClient;
+&nbsp;import co.elastic.clients.json.jackson.JacksonJsonpMapper;
+&nbsp;import co.elastic.clients.transport.ElasticsearchTransport;
+&nbsp;import co.elastic.clients.transport.rest_client.RestClientTransport;
+&nbsp;import com.fasterxml.jackson.databind.ObjectMapper;
+&nbsp;import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.apache.http.HttpHost;
+&nbsp;import org.apache.http.auth.AuthScope;
+&nbsp;import org.apache.http.auth.UsernamePasswordCredentials;
+&nbsp;import org.apache.http.client.CredentialsProvider;
+&nbsp;import org.apache.http.conn.ssl.NoopHostnameVerifier;
+&nbsp;import org.apache.http.impl.client.BasicCredentialsProvider;
+&nbsp;import org.apache.http.ssl.SSLContextBuilder;
+&nbsp;import org.elasticsearch.client.RestClient;
+&nbsp;import org.springframework.beans.factory.annotation.Value;
+&nbsp;import org.springframework.context.annotation.Bean;
+&nbsp;import org.springframework.context.annotation.Configuration;
+&nbsp;import org.springframework.context.annotation.Lazy;
+&nbsp;import javax.net.ssl.SSLContext;
+&nbsp;import java.security.cert.CertificateException;
+&nbsp;import java.security.cert.X509Certificate;
+&nbsp;
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;@Configuration
+<b class="fc">&nbsp;public class ElasticsearchConfig {</b>
+&nbsp;
+&nbsp;    @Value(&quot;${spring.elasticsearch.uris:https://localhost:9200}&quot;)
+&nbsp;    private String esUris;
+&nbsp;
+&nbsp;    @Value(&quot;${spring.elasticsearch.username:elastic}&quot;)
+&nbsp;    private String username;
+&nbsp;
+&nbsp;    @Value(&quot;${spring.elasticsearch.password:}&quot;)
+&nbsp;    private String password;
+&nbsp;
+&nbsp;    @Bean
+&nbsp;    @Lazy
+&nbsp;    public ElasticsearchClient elasticsearchClient() {
+&nbsp;        try {
+<b class="fc">&nbsp;            String uri = esUris.replace(&quot;https://&quot;, &quot;&quot;).replace(&quot;http://&quot;, &quot;&quot;);</b>
+<b class="fc">&nbsp;            String[] hostParts = uri.split(&quot;:&quot;);</b>
+<b class="fc">&nbsp;            String hostname = hostParts[0];</b>
+<b class="pc">&nbsp;            int port = hostParts.length &gt; 1 ? Integer.parseInt(hostParts[1]) : 9200;</b>
+&nbsp;
+<b class="fc">&nbsp;            log.info(&quot;正在连接Elasticsearch: {}:{} (启用安全认证)&quot;, hostname, port);</b>
+&nbsp;
+&nbsp;            // 配置用户名密码认证
+<b class="fc">&nbsp;            CredentialsProvider credentialsProvider = new BasicCredentialsProvider();</b>
+<b class="fc">&nbsp;            credentialsProvider.setCredentials(</b>
+&nbsp;                    AuthScope.ANY,
+&nbsp;                    new UsernamePasswordCredentials(username, password)
+&nbsp;            );
+&nbsp;
+&nbsp;            // 创建 RestClient，跳过 SSL 证书验证（开发环境）
+<b class="fc">&nbsp;            RestClient restClient = RestClient.builder(new HttpHost(hostname, port, &quot;https&quot;))</b>
+<b class="fc">&nbsp;                    .setHttpClientConfigCallback(httpClientBuilder -&gt; {</b>
+&nbsp;                        try {
+&nbsp;                            // 创建信任所有证书的 SSLContext
+<b class="fc">&nbsp;                            SSLContextBuilder sslBuilder = new SSLContextBuilder();</b>
+<b class="fc">&nbsp;                            sslBuilder.loadTrustMaterial(null, (chain, authType) -&gt; true);</b>
+<b class="fc">&nbsp;                            SSLContext sslContext = sslBuilder.build();</b>
+&nbsp;
+<b class="fc">&nbsp;                            httpClientBuilder.setSSLContext(sslContext);</b>
+<b class="fc">&nbsp;                            httpClientBuilder.setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE);</b>
+&nbsp;                        } catch (Exception e) {
+<b class="nc">&nbsp;                            log.error(&quot;SSL配置失败&quot;, e);</b>
+&nbsp;                        }
+<b class="fc">&nbsp;                        httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);</b>
+<b class="fc">&nbsp;                        return httpClientBuilder;</b>
+&nbsp;                    })
+<b class="fc">&nbsp;                    .setRequestConfigCallback(requestConfigBuilder -&gt; requestConfigBuilder</b>
+<b class="fc">&nbsp;                            .setConnectTimeout(5000)</b>
+<b class="fc">&nbsp;                            .setSocketTimeout(60000))</b>
+<b class="fc">&nbsp;                    .build();</b>
+&nbsp;
+&nbsp;            // 配置 JSON 映射器
+<b class="fc">&nbsp;            ObjectMapper objectMapper = new ObjectMapper();</b>
+<b class="fc">&nbsp;            objectMapper.registerModule(new JavaTimeModule());</b>
+&nbsp;
+<b class="fc">&nbsp;            ElasticsearchTransport transport = new RestClientTransport(</b>
+&nbsp;                    restClient,
+&nbsp;                    new JacksonJsonpMapper(objectMapper)
+&nbsp;            );
+&nbsp;
+<b class="fc">&nbsp;            ElasticsearchClient client = new ElasticsearchClient(transport);</b>
+&nbsp;
+&nbsp;            // 测试连接
+&nbsp;            try {
+<b class="fc">&nbsp;                boolean isConnected = client.ping().value();</b>
+<b class="pc">&nbsp;                if (isConnected) {</b>
+<b class="fc">&nbsp;                    log.info(&quot;✅ Elasticsearch连接成功 (安全认证模式)&quot;);</b>
+<b class="fc">&nbsp;                    var info = client.info();</b>
+<b class="fc">&nbsp;                    log.info(&quot;Elasticsearch版本: {}&quot;, info.version().number());</b>
+&nbsp;                }
+&nbsp;            } catch (Exception e) {
+<b class="nc">&nbsp;                log.warn(&quot;Elasticsearch连接测试失败: {}&quot;, e.getMessage());</b>
+&nbsp;            }
+&nbsp;
+<b class="fc">&nbsp;            return client;</b>
+&nbsp;        } catch (Exception e) {
+<b class="nc">&nbsp;            log.error(&quot;❌ Elasticsearch客户端初始化失败: {}&quot;, e.getMessage());</b>
+<b class="nc">&nbsp;            log.warn(&quot;操作日志将无法存入ES，但应用将继续运行&quot;);</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-06-15 16:56</div>
+</div>
+</body>
+</html>

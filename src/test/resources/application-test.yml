@@ -1,0 +1,36 @@
+# src/test/resources/application-test.yml
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+      database: 0
+
+
+  elasticsearch:
+    uris: https://localhost:9200
+    connection-timeout: 10s
+    socket-timeout: 30s
+    username: elastic
+    password: RKZ9COu7bgW9nVNhhZG5
+
+jwt:
+  secret: dGhpcy1pcy1hLXRlc3Qtc2VjcmV0LWtleS1mb3ItdW5pdC10ZXN0aW5nLW9ubHktYW5kLWl0LWlzLWxvbmctZW5vdWdo
+  expiration: 3600000
+
+redis:
+  cache:
+    user-prefix: "user:test:"
+    token-prefix: "token:test:"
+    session-ttl: 3600
+
+logging:
+  level:
+    com.tx.outsourcingmis: DEBUG

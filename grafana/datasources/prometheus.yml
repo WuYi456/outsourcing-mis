@@ -1,0 +1,13 @@
+# Grafana 数据源配置文件
+# 位置：./grafana/datasources/prometheus.yml
+# Grafana 启动时自动加载此配置
+
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy           # 通过 Grafana 后端代理访问，避免跨域问题
+    url: http://prometheus:9090   # Prometheus 服务地址（Docker 容器内访问）
+    isDefault: true         # 设为默认数据源
+    editable: true          # 允许在 Grafana UI 中编辑

@@ -1,0 +1,109 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > JobApplicationMapper</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.tx.outsourcingmis.mapper</a>
+</div>
+
+<h1>Coverage Summary for Class: JobApplicationMapper (com.tx.outsourcingmis.mapper)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">JobApplicationMapper$MockitoMock$2k3Cp3oH</td>
+  </tr>
+  <tr>
+    <td class="name">JobApplicationMapper$MockitoMock$2k3Cp3oH$auxiliary$bj0FFcUx</td>
+  </tr>
+  <tr>
+    <td class="name">JobApplicationMapper$MockitoMock$2k3Cp3oH$auxiliary$vktowjFq</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.tx.outsourcingmis.mapper;
+&nbsp;
+&nbsp;import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+&nbsp;import com.tx.outsourcingmis.entity.JobApplication;
+&nbsp;import org.apache.ibatis.annotations.Mapper;
+&nbsp;import org.apache.ibatis.annotations.Param;
+&nbsp;import org.apache.ibatis.annotations.Select;
+&nbsp;import org.apache.ibatis.annotations.Update;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;@Mapper
+&nbsp;public interface JobApplicationMapper extends BaseMapper&lt;JobApplication&gt; {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 查询用户的申请列表
+&nbsp;     */
+&nbsp;    @Select(&quot;SELECT * FROM job_application WHERE applicant_id = #{applicantId} ORDER BY apply_time DESC&quot;)
+&nbsp;    List&lt;JobApplication&gt; selectByApplicantId(@Param(&quot;applicantId&quot;) Long applicantId);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 查询待审批列表（根据审批人ID，仅查询状态为0待审批的记录）
+&nbsp;     */
+&nbsp;    @Select(&quot;SELECT * FROM job_application WHERE approver_id = #{approverId} AND status = 0 ORDER BY apply_time ASC&quot;)
+&nbsp;    List&lt;JobApplication&gt; selectPendingByApproverId(@Param(&quot;approverId&quot;) Long approverId);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 更新申请状态
+&nbsp;     */
+&nbsp;    @Update(&quot;UPDATE job_application SET status = #{status}, approve_time = NOW() WHERE id = #{id}&quot;)
+&nbsp;    int updateStatus(@Param(&quot;id&quot;) Long id, @Param(&quot;status&quot;) Integer status);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-06-15 16:56</div>
+</div>
+</body>
+</html>

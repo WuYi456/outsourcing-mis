@@ -1,0 +1,99 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > PerformanceMapper</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.tx.outsourcingmis.mapper</a>
+</div>
+
+<h1>Coverage Summary for Class: PerformanceMapper (com.tx.outsourcingmis.mapper)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">PerformanceMapper$MockitoMock$ChQCViKJ</td>
+  </tr>
+  <tr>
+    <td class="name">PerformanceMapper$MockitoMock$ChQCViKJ$auxiliary$BXLgAjCW</td>
+  </tr>
+  <tr>
+    <td class="name">PerformanceMapper$MockitoMock$ChQCViKJ$auxiliary$NV0IryGJ</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.tx.outsourcingmis.mapper;
+&nbsp;
+&nbsp;import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+&nbsp;import com.tx.outsourcingmis.entity.Performance;
+&nbsp;import org.apache.ibatis.annotations.Mapper;
+&nbsp;import org.apache.ibatis.annotations.Param;
+&nbsp;import org.apache.ibatis.annotations.Select;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;@Mapper
+&nbsp;public interface PerformanceMapper extends BaseMapper&lt;Performance&gt; {
+&nbsp;
+&nbsp;    @Select(&quot;SELECT * FROM performance WHERE user_id = #{userId} AND evaluate_year = #{year} AND evaluate_month = #{month}&quot;)
+&nbsp;    Performance selectByUserAndPeriod(@Param(&quot;userId&quot;) Long userId, @Param(&quot;year&quot;) Integer year, @Param(&quot;month&quot;) Integer month);
+&nbsp;
+&nbsp;    @Select(&quot;SELECT * FROM performance WHERE user_id = #{userId} ORDER BY evaluate_year DESC, evaluate_month DESC&quot;)
+&nbsp;    List&lt;Performance&gt; selectByUserId(@Param(&quot;userId&quot;) Long userId);
+&nbsp;
+&nbsp;    @Select(&quot;SELECT * FROM performance WHERE evaluate_year = #{year} AND evaluate_month = #{month} ORDER BY create_time DESC&quot;)
+&nbsp;    List&lt;Performance&gt; selectByPeriod(@Param(&quot;year&quot;) Integer year, @Param(&quot;month&quot;) Integer month);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-06-15 16:56</div>
+</div>
+</body>
+</html>

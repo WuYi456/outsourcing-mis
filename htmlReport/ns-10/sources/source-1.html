@@ -1,0 +1,129 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > OperationLogElasticsearchRepository</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.tx.outsourcingmis.es.repository</a>
+</div>
+
+<h1>Coverage Summary for Class: OperationLogElasticsearchRepository (com.tx.outsourcingmis.es.repository)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">OperationLogElasticsearchRepository$MockitoMock$jE4wUJ9I</td>
+  </tr>
+  <tr>
+    <td class="name">OperationLogElasticsearchRepository$MockitoMock$jE4wUJ9I$auxiliary$d1ujcAcU</td>
+  </tr>
+  <tr>
+    <td class="name">OperationLogElasticsearchRepository$MockitoMock$jE4wUJ9I$auxiliary$RQbWQNgq</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.tx.outsourcingmis.es.repository;
+&nbsp;
+&nbsp;import com.tx.outsourcingmis.es.document.OperationLogDocument;
+&nbsp;import org.springframework.data.domain.Page;
+&nbsp;import org.springframework.data.domain.Pageable;
+&nbsp;import org.springframework.data.elasticsearch.annotations.Query;
+&nbsp;import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
+&nbsp;import org.springframework.stereotype.Repository;
+&nbsp;
+&nbsp;import java.time.LocalDateTime;
+&nbsp;
+&nbsp;@Repository
+&nbsp;public interface OperationLogElasticsearchRepository extends ElasticsearchRepository&lt;OperationLogDocument, String&gt; {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 根据用户ID查询日志
+&nbsp;     */
+&nbsp;    Page&lt;OperationLogDocument&gt; findByUserId(Long userId, Pageable pageable);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 根据用户名查询日志
+&nbsp;     */
+&nbsp;    Page&lt;OperationLogDocument&gt; findByUsername(String username, Pageable pageable);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 根据操作类型查询日志
+&nbsp;     */
+&nbsp;    Page&lt;OperationLogDocument&gt; findByOperation(String operation, Pageable pageable);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 根据用户名和操作类型查询日志
+&nbsp;     */
+&nbsp;    Page&lt;OperationLogDocument&gt; findByUsernameAndOperation(String username, String operation, Pageable pageable);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 时间范围查询（使用 LocalDateTime）
+&nbsp;     */
+&nbsp;    Page&lt;OperationLogDocument&gt; findByCreateTimeBetween(LocalDateTime start, LocalDateTime end, Pageable pageable);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 高级搜索：根据用户名、操作类型、时间范围组合查询
+&nbsp;     * 支持 null 值（传空字符串表示忽略该条件）
+&nbsp;     */
+&nbsp;    @Query(&quot;{\&quot;bool\&quot;: {\&quot;must\&quot;: [&quot; +
+&nbsp;            &quot;{\&quot;match\&quot;: {\&quot;username\&quot;: \&quot;?0\&quot;}},&quot; +
+&nbsp;            &quot;{\&quot;match\&quot;: {\&quot;operation\&quot;: \&quot;?1\&quot;}},&quot; +
+&nbsp;            &quot;{\&quot;range\&quot;: {\&quot;create_time\&quot;: {\&quot;gte\&quot;: \&quot;?2\&quot;, \&quot;lte\&quot;: \&quot;?3\&quot;}}}&quot; +
+&nbsp;            &quot;]}}&quot;)
+&nbsp;    Page&lt;OperationLogDocument&gt; searchLogs(String username, String operation,
+&nbsp;                                          String startTime, String endTime,
+&nbsp;                                          Pageable pageable);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-06-15 16:56</div>
+</div>
+</body>
+</html>

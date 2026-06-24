@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>绩效管理 - 外包人员管理系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar-brand { font-weight: 700; }
+        .nav-link.active { background: rgba(255,255,255,0.15); border-radius: 8px; font-weight: 600; }
+        .card { border-radius: 12px; }
+        .grade-badge { padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 700; }
+        .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    </style>
+</head>
+<body>
+<!-- ===== 导航栏 ===== -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="/dashboard">
+            <i class="bi bi-people-fill me-2"></i>外包人员管理系统
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" href="/dashboard"><i class="bi bi-speedometer2 me-1"></i>仪表盘</a></li>
+                <li class="nav-item"><a class="nav-link" href="/user-management"><i class="bi bi-people me-1"></i>用户管理</a></li>
+                <li class="nav-item"><a class="nav-link" href="/applications"><i class="bi bi-file-earmark-text me-1"></i>上岗申请</a></li>
+                <li class="nav-item"><a class="nav-link" href="/approval"><i class="bi bi-check2-circle me-1"></i>审批管理</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/performance"><i class="bi bi-star me-1"></i>绩效管理</a></li>
+                <li class="nav-item"><a class="nav-link" href="/logs"><i class="bi bi-clock-history me-1"></i>操作日志</a></li>
+            </ul>
+            <div class="d-flex align-items-center">
+                <span class="text-white me-3"><i class="bi bi-person-circle me-1"></i><span id="usernameDisplay">用户</span></span>
+                <button class="btn btn-outline-light btn-sm" onclick="logout()"><i class="bi bi-box-arrow-right"></i> 退出</button>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- ===== 主内容 ===== -->
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4><i class="bi bi-star me-2 text-warning"></i>绩效管理</h4>
+        <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#evaluateModal">
+            <i class="bi bi-plus-circle me-1"></i>评定绩效
+        </button>
+    </div>
+
+    <!-- 筛选条件 -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">年份</label>
+                    <input type="number" class="form-control form-control-sm" id="filterYear" value="2026">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">月份</label>
+                    <input type="number" class="form-control form-control-sm" id="filterMonth" value="6" min="1" max="12">
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-primary btn-sm w-100" onclick="loadPerformances()"><i class="bi bi-search me-1"></i>查询</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 绩效列表 -->
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                    <tr>
+                        <th style="width:60px;">ID</th>
+                        <th>员工</th>
+                        <th style="width:80px;">等级</th>
+                        <th>评定人</th>
+                        <th style="width:100px;">年月</th>
+                        <th style="width:100px;">状态</th>
+                        <th style="width:100px;">操作</th>
+                    </tr>
+                    </thead>
+                    <tbody id="performanceTableBody">
+                    <tr><td colspan="7" class="text-center text-muted py-3">加载中...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 评定绩效弹窗 ===== -->
+<div class="modal fade" id="evaluateModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-star me-2 text-warning"></i>评定绩效</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="evaluateForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">员工ID <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="evalUserId" placeholder="请输入员工ID" required>
+                        <small class="text-muted">提示：先用用户列表查询员工ID</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">等级 <span class="text-danger">*</span></label>
+                        <select class="form-select" id="evalGrade">
+                            <option value="A">A - 优秀</option>
+                            <option value="B" selected>B - 良好</option>
+                            <option value="C">C - 合格</option>
+                            <option value="D">D - 待提升</option>
+                            <option value="E">E - 不合格</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">评定意见</label>
+                        <textarea class="form-control" id="evalComment" rows="2" placeholder="可选填写评定意见"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">年份 <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="evalYear" value="2026" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">月份 <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="evalMonth" value="6" min="1" max="12" required>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button class="btn btn-warning" onclick="submitEvaluate()"><i class="bi bi-check2 me-1"></i>确认评定</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // ===== 全局变量 =====
+    const TOKEN = localStorage.getItem('token');
+    if (!TOKEN) window.location.href = '/login';
+    document.getElementById('usernameDisplay').textContent = localStorage.getItem('username') || '用户';
+
+    // ===== 页面加载 =====
+    loadPerformances();
+
+    // ===== 加载绩效列表 =====
+    async function loadPerformances() {
+        const year = document.getElementById('filterYear').value || 2026;
+        const month = document.getElementById('filterMonth').value || 6;
+        const tbody = document.getElementById('performanceTableBody');
+
+        try {
+            const res = await fetch(`/api/performance/period?year=${year}&month=${month}`, {
+                headers: { 'Authorization': 'Bearer ' + TOKEN }
+            });
+            const result = await res.json();
+
+            if (result.code === 200 && result.data && result.data.length > 0) {
+                tbody.innerHTML = result.data.map(p => `
+                        <tr>
+                            <td>#${p.id}</td>
+                            <td><strong>${p.userName || '未知'}</strong></td>
+                            <td><span class="grade-badge ${getGradeClass(p.grade)}">${p.grade || '-'}</span></td>
+                            <td>${p.evaluatorName || '-'}</td>
+                            <td>${p.evaluateYear}-${String(p.evaluateMonth).padStart(2, '0')}</td>
+                            <td><span class="status-badge ${p.status === 0 ? 'bg-warning text-dark' : 'bg-success text-white'}">${p.statusDesc || '-'}</span></td>
+                            <td>
+                                ${p.status === 0 ? `<button class="btn btn-sm btn-outline-success" onclick="confirmPerf(${p.id})"><i class="bi bi-check2"></i> 确认</button>` : '-'}
+                            </td>
+                        </tr>
+                    `).join('');
+            } else {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-3">暂无绩效记录</td></tr>';
+            }
+        } catch (e) {
+            console.error('加载失败', e);
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-3">加载失败，请重试</td></tr>';
+        }
+    }
+
+    // ===== 等级样式 =====
+    function getGradeClass(grade) {
+        const map = {
+            'A': 'bg-success text-white',
+            'B': 'bg-info text-dark',
+            'C': 'bg-primary text-white',
+            'D': 'bg-warning text-dark',
+            'E': 'bg-danger text-white'
+        };
+        return map[grade] || 'bg-secondary text-white';
+    }
+
+    // ===== 提交评定 =====
+    async function submitEvaluate() {
+        const userId = document.getElementById('evalUserId').value.trim();
+        const grade = document.getElementById('evalGrade').value;
+        const comment = document.getElementById('evalComment').value.trim();
+        const year = document.getElementById('evalYear').value.trim();
+        const month = document.getElementById('evalMonth').value.trim();
+
+        if (!userId) { alert('请输入员工ID'); return; }
+        if (!year || !month) { alert('请填写年份和月份'); return; }
+
+        try {
+            const res = await fetch('/api/performance/evaluate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + TOKEN
+                },
+                body: JSON.stringify({
+                    userId: parseInt(userId),
+                    grade: grade,
+                    comment: comment,
+                    evaluateYear: parseInt(year),
+                    evaluateMonth: parseInt(month)
+                })
+            });
+            const result = await res.json();
+            if (result.code === 200) {
+                alert('✅ 绩效评定成功！');
+                bootstrap.Modal.getInstance(document.getElementById('evaluateModal')).hide();
+                document.getElementById('evaluateForm').reset();
+                loadPerformances();
+            } else {
+                alert('❌ ' + result.msg);
+            }
+        } catch (e) {
+            alert('网络错误');
+        }
+    }
+
+    // ===== 确认绩效 =====
+    async function confirmPerf(id) {
+        if (!confirm('确认此绩效？')) return;
+        try {
+            const res = await fetch(`/api/performance/confirm/${id}`, {
+                method: 'PUT',
+                headers: { 'Authorization': 'Bearer ' + TOKEN }
+            });
+            const result = await res.json();
+            if (result.code === 200) {
+                alert('✅ 已确认');
+                loadPerformances();
+            } else {
+                alert('❌ ' + result.msg);
+            }
+        } catch (e) {
+            alert('网络错误');
+        }
+    }
+
+    // ===== 退出登录 =====
+    function logout() {
+        localStorage.clear();
+        window.location.href = '/login';
+    }
+</script>
+</body>
+</html>

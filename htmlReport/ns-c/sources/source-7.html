@@ -1,0 +1,132 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > CacheService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.tx.outsourcingmis.service</a>
+</div>
+
+<h1>Coverage Summary for Class: CacheService (com.tx.outsourcingmis.service)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">CacheService$MockitoMock$td9E0kNX</td>
+  </tr>
+  <tr>
+    <td class="name">CacheService$MockitoMock$td9E0kNX$auxiliary$2HV7xSDq</td>
+  </tr>
+  <tr>
+    <td class="name">CacheService$MockitoMock$td9E0kNX$auxiliary$Rdra877L</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.tx.outsourcingmis.service;
+&nbsp;
+&nbsp;import com.tx.outsourcingmis.dto.LoginResponse;
+&nbsp;import com.tx.outsourcingmis.entity.User;
+&nbsp;
+&nbsp;/**
+&nbsp; * Redis缓存服务接口
+&nbsp; */
+&nbsp;public interface CacheService {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 缓存用户登录信息
+&nbsp;     */
+&nbsp;    void cacheUserLogin(String token, LoginResponse loginResponse, Long userId);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 根据Token获取登录信息
+&nbsp;     */
+&nbsp;    LoginResponse getLoginResponseByToken(String token);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 根据用户ID获取用户信息（带缓存）
+&nbsp;     */
+&nbsp;    User getUserById(Long userId);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 缓存用户信息
+&nbsp;     */
+&nbsp;    void cacheUser(User user);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 删除用户登录信息
+&nbsp;     */
+&nbsp;    void removeUserLogin(String token);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 删除用户缓存
+&nbsp;     */
+&nbsp;    void removeUserCache(Long userId);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 检查Token是否有效
+&nbsp;     */
+&nbsp;    boolean isTokenValid(String token);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 获取缓存的Token
+&nbsp;     */
+&nbsp;    String getTokenByUserId(Long userId);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 更新Token（重新登录时）
+&nbsp;     */
+&nbsp;    void updateUserToken(Long userId, String oldToken, String newToken);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-06-15 16:56</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,192 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > RedisConfig</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.tx.outsourcingmis.config</a>
+</div>
+
+<h1>Coverage Summary for Class: RedisConfig (com.tx.outsourcingmis.config)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">RedisConfig</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (25/25)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">RedisConfig$$SpringCGLIB$$0</td>
+  </tr>
+  <tr>
+    <td class="name">RedisConfig$$SpringCGLIB$$FastClass$$0</td>
+  </tr>
+  <tr>
+    <td class="name">RedisConfig$$SpringCGLIB$$FastClass$$1</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (25/25)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.tx.outsourcingmis.config;
+&nbsp;
+&nbsp;import com.fasterxml.jackson.annotation.JsonAutoDetect;
+&nbsp;import com.fasterxml.jackson.annotation.PropertyAccessor;
+&nbsp;import com.fasterxml.jackson.databind.ObjectMapper;
+&nbsp;import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
+&nbsp;import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+&nbsp;import org.springframework.cache.annotation.EnableCaching;
+&nbsp;import org.springframework.context.annotation.Bean;
+&nbsp;import org.springframework.context.annotation.Configuration;
+&nbsp;import org.springframework.data.redis.cache.RedisCacheConfiguration;
+&nbsp;import org.springframework.data.redis.cache.RedisCacheManager;
+&nbsp;import org.springframework.data.redis.connection.RedisConnectionFactory;
+&nbsp;import org.springframework.data.redis.core.RedisTemplate;
+&nbsp;import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+&nbsp;import org.springframework.data.redis.serializer.RedisSerializationContext;
+&nbsp;import org.springframework.data.redis.serializer.StringRedisSerializer;
+&nbsp;
+&nbsp;import java.time.Duration;
+&nbsp;
+&nbsp;@Configuration
+&nbsp;@EnableCaching
+<b class="fc">&nbsp;public class RedisConfig {</b>
+&nbsp;
+&nbsp;    @Bean
+&nbsp;    public RedisTemplate&lt;String, Object&gt; redisTemplate(RedisConnectionFactory connectionFactory) {
+<b class="fc">&nbsp;        RedisTemplate&lt;String, Object&gt; template = new RedisTemplate&lt;&gt;();</b>
+<b class="fc">&nbsp;        template.setConnectionFactory(connectionFactory);</b>
+&nbsp;
+&nbsp;        // JSON序列化配置
+<b class="fc">&nbsp;        Jackson2JsonRedisSerializer&lt;Object&gt; jackson2JsonRedisSerializer = getJackson2JsonRedisSerializer();</b>
+&nbsp;
+&nbsp;        // String序列化
+<b class="fc">&nbsp;        StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();</b>
+&nbsp;
+&nbsp;        // key使用String序列化
+<b class="fc">&nbsp;        template.setKeySerializer(stringRedisSerializer);</b>
+<b class="fc">&nbsp;        template.setHashKeySerializer(stringRedisSerializer);</b>
+&nbsp;
+&nbsp;        // value使用JSON序列化
+<b class="fc">&nbsp;        template.setValueSerializer(jackson2JsonRedisSerializer);</b>
+<b class="fc">&nbsp;        template.setHashValueSerializer(jackson2JsonRedisSerializer);</b>
+&nbsp;
+<b class="fc">&nbsp;        template.afterPropertiesSet();</b>
+<b class="fc">&nbsp;        return template;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Bean
+&nbsp;    public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+<b class="fc">&nbsp;        Jackson2JsonRedisSerializer&lt;Object&gt; jackson2JsonRedisSerializer = getJackson2JsonRedisSerializer();</b>
+&nbsp;
+<b class="fc">&nbsp;        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()</b>
+<b class="fc">&nbsp;                .entryTtl(Duration.ofHours(2))</b>
+<b class="fc">&nbsp;                .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))</b>
+<b class="fc">&nbsp;                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(jackson2JsonRedisSerializer))</b>
+<b class="fc">&nbsp;                .disableCachingNullValues();</b>
+&nbsp;
+<b class="fc">&nbsp;        return RedisCacheManager.builder(connectionFactory)</b>
+<b class="fc">&nbsp;                .cacheDefaults(config)</b>
+<b class="fc">&nbsp;                .build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private Jackson2JsonRedisSerializer&lt;Object&gt; getJackson2JsonRedisSerializer() {
+<b class="fc">&nbsp;        ObjectMapper om = new ObjectMapper();</b>
+<b class="fc">&nbsp;        om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);</b>
+<b class="fc">&nbsp;        om.activateDefaultTyping(LaissezFaireSubTypeValidator.instance, ObjectMapper.DefaultTyping.NON_FINAL);</b>
+<b class="fc">&nbsp;        om.registerModule(new JavaTimeModule());</b>
+&nbsp;
+&nbsp;        // 修复：直接在构造器中传入 ObjectMapper
+<b class="fc">&nbsp;        return new Jackson2JsonRedisSerializer&lt;&gt;(om, Object.class);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-06-15 16:56</div>
+</div>
+</body>
+</html>

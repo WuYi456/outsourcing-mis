@@ -1,0 +1,217 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > JwtUtils</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.tx.outsourcingmis.utils</a>
+</div>
+
+<h1>Coverage Summary for Class: JwtUtils (com.tx.outsourcingmis.utils)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">JwtUtils</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (10/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    94.4%
+  </span>
+  <span class="absValue">
+    (34/36)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.tx.outsourcingmis.utils;
+&nbsp;
+&nbsp;import io.jsonwebtoken.*;
+&nbsp;import io.jsonwebtoken.security.Keys;
+&nbsp;import io.jsonwebtoken.io.Decoders;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.beans.factory.annotation.Value;
+&nbsp;import org.springframework.stereotype.Component;
+&nbsp;
+&nbsp;import javax.crypto.SecretKey;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;@Component
+<b class="fc">&nbsp;public class JwtUtils {</b>
+&nbsp;
+&nbsp;    @Value(&quot;${jwt.secret}&quot;)
+&nbsp;    private String secret;
+&nbsp;
+&nbsp;    @Value(&quot;${jwt.expiration}&quot;)
+&nbsp;    private Long expiration;
+&nbsp;
+&nbsp;    private SecretKey getSigningKey() {
+<b class="fc">&nbsp;        byte[] keyBytes = Decoders.BASE64.decode(secret);</b>
+<b class="fc">&nbsp;        return Keys.hmacShaKeyFor(keyBytes);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 生成JWT Token
+&nbsp;     * @param userId 用户ID
+&nbsp;     * @param username 用户名
+&nbsp;     * @param role 角色
+&nbsp;     * @param permissions 权限列表
+&nbsp;     * @return JWT Token
+&nbsp;     */
+&nbsp;    public String generateToken(Long userId, String username, String role, List&lt;String&gt; permissions) {
+<b class="fc">&nbsp;        Date now = new Date();</b>
+<b class="fc">&nbsp;        Date expiryDate = new Date(now.getTime() + expiration);</b>
+&nbsp;
+<b class="fc">&nbsp;        return Jwts.builder()</b>
+<b class="fc">&nbsp;                .setSubject(String.valueOf(userId))</b>
+<b class="fc">&nbsp;                .claim(&quot;username&quot;, username)</b>
+<b class="fc">&nbsp;                .claim(&quot;role&quot;, role)</b>
+<b class="fc">&nbsp;                .claim(&quot;permissions&quot;, permissions)</b>
+<b class="fc">&nbsp;                .setIssuedAt(now)</b>
+<b class="fc">&nbsp;                .setExpiration(expiryDate)</b>
+<b class="fc">&nbsp;                .signWith(getSigningKey(), SignatureAlgorithm.HS512)</b>
+<b class="fc">&nbsp;                .compact();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 从Token中获取用户ID
+&nbsp;     */
+&nbsp;    public Long getUserIdFromToken(String token) {
+<b class="fc">&nbsp;        Claims claims = parseToken(token);</b>
+<b class="fc">&nbsp;        return Long.valueOf(claims.getSubject());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 从Token中获取用户名
+&nbsp;     */
+&nbsp;    public String getUsernameFromToken(String token) {
+<b class="fc">&nbsp;        Claims claims = parseToken(token);</b>
+<b class="fc">&nbsp;        return (String) claims.get(&quot;username&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 从Token中获取角色
+&nbsp;     */
+&nbsp;    public String getRoleFromToken(String token) {
+<b class="fc">&nbsp;        Claims claims = parseToken(token);</b>
+<b class="fc">&nbsp;        return (String) claims.get(&quot;role&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 从Token中获取权限列表
+&nbsp;     */
+&nbsp;    @SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;    public List&lt;String&gt; getPermissionsFromToken(String token) {
+<b class="fc">&nbsp;        Claims claims = parseToken(token);</b>
+<b class="fc">&nbsp;        return (List&lt;String&gt;) claims.get(&quot;permissions&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 验证Token是否有效
+&nbsp;     */
+&nbsp;    public boolean validateToken(String token) {
+&nbsp;        try {
+<b class="fc">&nbsp;            parseToken(token);</b>
+<b class="fc">&nbsp;            return true;</b>
+&nbsp;        } catch (ExpiredJwtException e) {
+<b class="fc">&nbsp;            log.error(&quot;Token已过期: {}&quot;, e.getMessage());</b>
+&nbsp;        } catch (UnsupportedJwtException e) {
+<b class="nc">&nbsp;            log.error(&quot;不支持的Token格式: {}&quot;, e.getMessage());</b>
+&nbsp;        } catch (MalformedJwtException e) {
+<b class="fc">&nbsp;            log.error(&quot;Token格式错误: {}&quot;, e.getMessage());</b>
+&nbsp;        } catch (IllegalArgumentException e) {
+<b class="fc">&nbsp;            log.error(&quot;Token参数非法: {}&quot;, e.getMessage());</b>
+&nbsp;        } catch (JwtException e) {
+<b class="nc">&nbsp;            log.error(&quot;JWT验证失败: {}&quot;, e.getMessage());</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private Claims parseToken(String token) {
+<b class="fc">&nbsp;        return Jwts.parserBuilder()</b>
+<b class="fc">&nbsp;                .setSigningKey(getSigningKey())</b>
+<b class="fc">&nbsp;                .build()</b>
+<b class="fc">&nbsp;                .parseClaimsJws(token)</b>
+<b class="fc">&nbsp;                .getBody();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-06-15 16:56</div>
+</div>
+</body>
+</html>

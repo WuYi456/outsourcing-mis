@@ -1,0 +1,111 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > UserService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.tx.outsourcingmis.service</a>
+</div>
+
+<h1>Coverage Summary for Class: UserService (com.tx.outsourcingmis.service)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">UserService$MockitoMock$2ZUbGh2i</td>
+  </tr>
+  <tr>
+    <td class="name">UserService$MockitoMock$2ZUbGh2i$auxiliary$bumauLPC</td>
+  </tr>
+  <tr>
+    <td class="name">UserService$MockitoMock$2ZUbGh2i$auxiliary$zXrYYZxl</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;// UserService.java
+&nbsp;package com.tx.outsourcingmis.service;
+&nbsp;
+&nbsp;import com.tx.outsourcingmis.dto.LoginRequest;
+&nbsp;import com.tx.outsourcingmis.dto.LoginResponse;
+&nbsp;import com.tx.outsourcingmis.entity.User;
+&nbsp;
+&nbsp;public interface UserService {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 用户注册
+&nbsp;     */
+&nbsp;    void register(User user);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 用户登录
+&nbsp;     */
+&nbsp;    LoginResponse login(LoginRequest loginRequest);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 用户登出（JWT无状态，登出由前端丢弃Token实现）
+&nbsp;     */
+&nbsp;    void logout();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 获取当前登录用户信息
+&nbsp;     */
+&nbsp;    User getCurrentUser();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 根据用户名获取用户
+&nbsp;     */
+&nbsp;    User getUserByUsername(String username);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-06-15 16:56</div>
+</div>
+</body>
+</html>

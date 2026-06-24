@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户管理 - 外包人员管理系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar-brand { font-weight: 700; }
+        .nav-link.active { background: rgba(255,255,255,0.15); border-radius: 8px; font-weight: 600; }
+        .card { border-radius: 12px; }
+        .avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; color: white; }
+        .role-badge { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+<!-- ===== 导航栏 ===== -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="/dashboard">
+            <i class="bi bi-people-fill me-2"></i>外包人员管理系统
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" href="/dashboard"><i class="bi bi-speedometer2 me-1"></i>仪表盘</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/user-management"><i class="bi bi-people me-1"></i>用户管理</a></li>
+                <li class="nav-item"><a class="nav-link" href="/applications"><i class="bi bi-file-earmark-text me-1"></i>上岗申请</a></li>
+                <li class="nav-item"><a class="nav-link" href="/approval"><i class="bi bi-check2-circle me-1"></i>审批管理</a></li>
+                <li class="nav-item"><a class="nav-link" href="/performance"><i class="bi bi-star me-1"></i>绩效管理</a></li>
+                <li class="nav-item"><a class="nav-link" href="/logs"><i class="bi bi-clock-history me-1"></i>操作日志</a></li>
+            </ul>
+            <div class="d-flex align-items-center">
+                <span class="text-white me-3"><i class="bi bi-person-circle me-1"></i><span id="usernameDisplay">用户</span></span>
+                <button class="btn btn-outline-light btn-sm" onclick="logout()"><i class="bi bi-box-arrow-right"></i> 退出</button>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- ===== 主内容 ===== -->
+<div class="container-fluid mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4><i class="bi bi-people me-2 text-primary"></i>用户管理</h4>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+            <i class="bi bi-plus-circle me-1"></i>添加用户
+        </button>
+    </div>
+
+    <!-- 用户列表 -->
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                    <tr>
+                        <th style="width:50px;">ID</th>
+                        <th>用户名</th>
+                        <th>真实姓名</th>
+                        <th>邮箱</th>
+                        <th>手机号</th>
+                        <th>角色</th>
+                        <th>状态</th>
+                        <th style="width:80px;">操作</th>
+                    </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                    <tr><td colspan="8" class="text-center text-muted py-3">加载中...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- 分页 -->
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <span class="text-muted small" id="pageInfo">第 0 页，共 0 页</span>
+                <div>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="changePage(-1)" id="prevPage">上一页</button>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="changePage(1)" id="nextPage">下一页</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 添加用户弹窗 ===== -->
+<div class="modal fade" id="addUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-person-plus me-2 text-primary"></i>添加用户</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addUserForm">
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-semibold">用户名 <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="addUsername" placeholder="用户名" required>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-semibold">密码 <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="addPassword" placeholder="密码" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-semibold">真实姓名</label>
+                            <input type="text" class="form-control" id="addRealName" placeholder="真实姓名">
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-semibold">角色</label>
+                            <select class="form-select" id="addRole">
+                                <option value="EMPLOYEE">员工</option>
+                                <option value="MANAGER">领导</option>
+                                <option value="ADMIN">管理员</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-semibold">邮箱</label>
+                            <input type="email" class="form-control" id="addEmail" placeholder="邮箱">
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-semibold">手机号</label>
+                            <input type="text" class="form-control" id="addPhone" placeholder="手机号">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">上级领导ID</label>
+                        <input type="number" class="form-control" id="addLeaderId" placeholder="上级领导ID（员工必填）">
+                        <small class="text-muted">员工角色需要填写上级领导ID</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button class="btn btn-primary" onclick="addUser()"><i class="bi bi-check2 me-1"></i>确认添加</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 查看用户弹窗 ===== -->
+<div class="modal fade" id="viewUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-person me-2 text-info"></i>用户详情</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <div class="avatar bg-primary mx-auto" style="width:64px;height:64px;font-size:28px;" id="viewAvatar">A</div>
+                    <h5 class="mt-2" id="viewUsername">-</h5>
+                    <span class="role-badge" id="viewRole">-</span>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <p class="text-muted small mb-0">用户ID</p>
+                        <p id="viewId">-</p>
+                    </div>
+                    <div class="col-6">
+                        <p class="text-muted small mb-0">状态</p>
+                        <p id="viewStatus">-</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <p class="text-muted small mb-0">真实姓名</p>
+                        <p id="viewRealName">-</p>
+                    </div>
+                    <div class="col-6">
+                        <p class="text-muted small mb-0">上级领导ID</p>
+                        <p id="viewLeaderId">-</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <p class="text-muted small mb-0">邮箱</p>
+                        <p id="viewEmail">-</p>
+                    </div>
+                    <div class="col-6">
+                        <p class="text-muted small mb-0">手机号</p>
+                        <p id="viewPhone">-</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <p class="text-muted small mb-0">创建时间</p>
+                        <p id="viewCreateTime">-</p>
+                    </div>
+                    <div class="col-6">
+                        <p class="text-muted small mb-0">更新时间</p>
+                        <p id="viewUpdateTime">-</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // ===== 全局变量 =====
+    const TOKEN = localStorage.getItem('token');
+    if (!TOKEN) window.location.href = '/login';
+    document.getElementById('usernameDisplay').textContent = localStorage.getItem('username') || '用户';
+
+    let currentPage = 0;
+    let totalPages = 0;
+    let allUsers = [];
+
+    // ===== 页面加载 =====
+    loadUsers();
+
+    // ===== 加载用户列表 =====
+    async function loadUsers() {
+        const tbody = document.getElementById('userTableBody');
+
+        try {
+            const res = await fetch(`/api/user/list?pageNum=${currentPage + 1}&pageSize=10`, {
+                headers: { 'Authorization': 'Bearer ' + TOKEN }
+            });
+            const result = await res.json();
+
+            if (result.code === 200 && result.data) {
+                const users = result.data.list || [];
+                allUsers = users;
+                totalPages = result.data.pages || 1;
+
+                document.getElementById('pageInfo').textContent =
+                    `第 ${currentPage + 1} 页，共 ${totalPages} 页`;
+
+                if (users.length > 0) {
+                    tbody.innerHTML = users.map(u => `
+                            <tr>
+                                <td>${u.id}</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar bg-primary me-2">${u.username.charAt(0).toUpperCase()}</div>
+                                        <div>
+                                            <div class="fw-semibold">${u.username}</div>
+                                            <div class="small text-muted">ID: ${u.id}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>${u.realName || '-'}</td>
+                                <td>${u.email || '-'}</td>
+                                <td>${u.phone || '-'}</td>
+                                <td><span class="role-badge ${getRoleClass(u.role)}">${u.role || 'EMPLOYEE'}</span></td>
+                                <td><span class="status-badge ${u.status === 1 ? 'bg-success text-white' : 'bg-danger text-white'}">${u.status === 1 ? '启用' : '禁用'}</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-info" onclick="viewUser(${u.id})" title="查看"><i class="bi bi-eye"></i></button>
+                                </td>
+                            </tr>
+                        `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-3">暂无用户</td></tr>';
+                }
+
+                document.getElementById('prevPage').disabled = currentPage === 0;
+                document.getElementById('nextPage').disabled = currentPage >= totalPages - 1;
+            } else {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-3">加载失败</td></tr>';
+            }
+        } catch (e) {
+            console.error('加载失败', e);
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-3">加载失败，请重试</td></tr>';
+        }
+    }
+
+    // ===== 角色样式 =====
+    function getRoleClass(role) {
+        const map = {
+            'ADMIN': 'bg-danger text-white',
+            'MANAGER': 'bg-warning text-dark',
+            'EMPLOYEE': 'bg-info text-dark'
+        };
+        return map[role] || 'bg-secondary text-white';
+    }
+
+    // ===== 翻页 =====
+    function changePage(delta) {
+        const newPage = currentPage + delta;
+        if (newPage < 0 || newPage >= totalPages) return;
+        currentPage = newPage;
+        loadUsers();
+    }
+
+    // ===== 添加用户 =====
+    async function addUser() {
+        const username = document.getElementById('addUsername').value.trim();
+        const password = document.getElementById('addPassword').value.trim();
+        const realName = document.getElementById('addRealName').value.trim();
+        const role = document.getElementById('addRole').value;
+        const email = document.getElementById('addEmail').value.trim();
+        const phone = document.getElementById('addPhone').value.trim();
+        const leaderId = document.getElementById('addLeaderId').value.trim();
+
+        if (!username) { alert('请输入用户名'); return; }
+        if (!password || password.length < 6) { alert('密码至少6位'); return; }
+
+        const body = { username, password, realName, role };
+        if (email) body.email = email;
+        if (phone) body.phone = phone;
+        if (leaderId) body.leaderId = parseInt(leaderId);
+
+        try {
+            const res = await fetch('/api/user/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + TOKEN
+                },
+                body: JSON.stringify(body)
+            });
+            const result = await res.json();
+            if (result.code === 200) {
+                alert('用户添加成功');
+                bootstrap.Modal.getInstance(document.getElementById('addUserModal')).hide();
+                document.getElementById('addUserForm').reset();
+                loadUsers();
+            } else {
+                alert(result.msg);
+            }
+        } catch (e) {
+            alert('网络错误');
+        }
+    }
+
+    // ===== 查看用户详情 =====
+    async function viewUser(id) {
+        try {
+            const user = allUsers.find(u => u.id === id);
+            if (!user) {
+                alert('用户信息不存在');
+                return;
+            }
+            showUserDetail(user);
+        } catch (e) {
+            alert('网络错误');
+        }
+    }
+
+    function showUserDetail(user) {
+        document.getElementById('viewId').textContent = user.id;
+        document.getElementById('viewUsername').textContent = user.username;
+        document.getElementById('viewAvatar').textContent = user.username.charAt(0).toUpperCase();
+        document.getElementById('viewRealName').textContent = user.realName || '-';
+        document.getElementById('viewRole').textContent = user.role || 'EMPLOYEE';
+        document.getElementById('viewRole').className = 'role-badge ' + getRoleClass(user.role);
+        document.getElementById('viewStatus').innerHTML = user.status === 1 ?
+            '<span class="badge bg-success">启用</span>' :
+            '<span class="badge bg-danger">禁用</span>';
+        document.getElementById('viewEmail').textContent = user.email || '-';
+        document.getElementById('viewPhone').textContent = user.phone || '-';
+        document.getElementById('viewLeaderId').textContent = user.leaderId || '-';
+        document.getElementById('viewCreateTime').textContent = user.createTime ? user.createTime.replace('T', ' ') : '-';
+        document.getElementById('viewUpdateTime').textContent = user.updateTime ? user.updateTime.replace('T', ' ') : '-';
+
+        new bootstrap.Modal(document.getElementById('viewUserModal')).show();
+    }
+
+    // ===== 退出登录 =====
+    function logout() {
+        localStorage.clear();
+        window.location.href = '/login';
+    }
+</script>
+</body>
+</html>

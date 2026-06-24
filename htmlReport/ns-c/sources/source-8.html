@@ -1,0 +1,114 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > JobApplicationService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.tx.outsourcingmis.service</a>
+</div>
+
+<h1>Coverage Summary for Class: JobApplicationService (com.tx.outsourcingmis.service)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">JobApplicationService$MockitoMock$061hFCch</td>
+  </tr>
+  <tr>
+    <td class="name">JobApplicationService$MockitoMock$061hFCch$auxiliary$xAPVhG1g</td>
+  </tr>
+  <tr>
+    <td class="name">JobApplicationService$MockitoMock$061hFCch$auxiliary$ZkuK93VB</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.tx.outsourcingmis.service;
+&nbsp;
+&nbsp;import com.tx.outsourcingmis.dto.JobApplicationRequest;
+&nbsp;import com.tx.outsourcingmis.dto.JobApplicationResponse;
+&nbsp;import com.tx.outsourcingmis.entity.JobApplication;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;public interface JobApplicationService {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 提交上岗申请
+&nbsp;     * @param request 申请请求
+&nbsp;     * @return 申请响应
+&nbsp;     */
+&nbsp;    JobApplicationResponse submitApplication(JobApplicationRequest request);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 获取当前用户的申请列表
+&nbsp;     */
+&nbsp;    List&lt;JobApplicationResponse&gt; getMyApplications();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 根据申请ID获取详情
+&nbsp;     */
+&nbsp;    JobApplicationResponse getApplicationDetail(Long id);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 取消申请（仅待审批状态可取消）
+&nbsp;     */
+&nbsp;    void cancelApplication(Long id);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 获取申请实体（内部使用）
+&nbsp;     */
+&nbsp;    JobApplication getById(Long id);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-06-15 16:56</div>
+</div>
+</body>
+</html>

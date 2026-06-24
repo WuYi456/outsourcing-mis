@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>外包人员管理系统 - 登录</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .login-card {
+            max-width: 420px;
+            margin: 0 auto;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            background: white;
+            padding: 40px 35px;
+        }
+        .login-card .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .login-card .logo i {
+            font-size: 48px;
+            color: #667eea;
+        }
+        .login-card .logo h3 {
+            margin-top: 10px;
+            font-weight: 700;
+            color: #333;
+        }
+        .login-card .logo p {
+            color: #888;
+            font-size: 14px;
+        }
+        .form-control {
+            border-radius: 10px;
+            padding: 12px 15px;
+        }
+        .btn-login {
+            border-radius: 10px;
+            padding: 12px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            width: 100%;
+            color: white;
+            font-size: 16px;
+        }
+        .btn-login:hover { opacity: 0.9; color: white; }
+        .btn-login:disabled { opacity: 0.6; }
+        .alert { border-radius: 10px; }
+        .input-group-text { border-radius: 10px 0 0 10px; }
+        .form-control { border-radius: 0 10px 10px 0; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="login-card">
+        <div class="logo">
+            <i class="bi bi-people-fill"></i>
+            <h3>外包人员管理系统</h3>
+            <p>测试外包人员管理平台</p>
+        </div>
+
+        <div id="errorAlert" class="alert alert-danger d-none" role="alert">
+            <i class="bi bi-exclamation-circle me-1"></i>
+            <span id="errorMsg">用户名或密码错误</span>
+        </div>
+
+        <form id="loginForm">
+            <div class="mb-3">
+                <label class="form-label fw-semibold">用户名</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+                    <input type="text" class="form-control" id="username" placeholder="请输入用户名" value="admin">
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-semibold">密码</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="bi bi-lock"></i></span>
+                    <input type="password" class="form-control" id="password" placeholder="请输入密码" value="123456">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-login" id="loginBtn">
+                <span id="loginText">登 录</span>
+                <span id="loginSpinner" class="spinner-border spinner-border-sm d-none"></span>
+            </button>
+        </form>
+
+        <div class="text-center mt-3">
+            <small class="text-muted">默认账号: admin / 密码: 123456</small>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value.trim();
+        const errorAlert = document.getElementById('errorAlert');
+        const errorMsg = document.getElementById('errorMsg');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginText = document.getElementById('loginText');
+        const loginSpinner = document.getElementById('loginSpinner');
+
+        errorAlert.classList.add('d-none');
+        loginBtn.disabled = true;
+        loginText.textContent = '登录中...';
+        loginSpinner.classList.remove('d-none');
+
+        try {
+            const response = await fetch('/api/user/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const result = await response.json();
+
+            if (result.code === 200 && result.data) {
+                localStorage.setItem('token', result.data.token);
+                localStorage.setItem('username', result.data.username);
+                localStorage.setItem('role', result.data.role);
+                localStorage.setItem('userId', result.data.userId);
+                window.location.href = '/dashboard';
+            } else {
+                errorMsg.textContent = result.msg || '登录失败，请检查用户名和密码';
+                errorAlert.classList.remove('d-none');
+            }
+        } catch (err) {
+            errorMsg.textContent = '网络错误，请稍后重试';
+            errorAlert.classList.remove('d-none');
+        } finally {
+            loginBtn.disabled = false;
+            loginText.textContent = '登 录';
+            loginSpinner.classList.add('d-none');
+        }
+    });
+
+    // 回车键触发展
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+        }
+    });
+</script>
+</body>
+</html>

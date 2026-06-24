@@ -1,0 +1,230 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > JvmMonitorController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.tx.outsourcingmis.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: JvmMonitorController (com.tx.outsourcingmis.controller)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">JvmMonitorController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (5/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90.9%
+  </span>
+  <span class="absValue">
+    (30/33)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">JvmMonitorController$$SpringCGLIB$$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (5/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90.9%
+  </span>
+  <span class="absValue">
+    (30/33)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.tx.outsourcingmis.controller;
+&nbsp;
+&nbsp;import com.tx.outsourcingmis.annotation.RequirePermission;
+&nbsp;import com.tx.outsourcingmis.common.ResultVO;
+&nbsp;import com.tx.outsourcingmis.service.JvmMetricsService;
+&nbsp;import io.swagger.v3.oas.annotations.Operation;
+&nbsp;import io.swagger.v3.oas.annotations.tags.Tag;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.web.bind.annotation.GetMapping;
+&nbsp;import org.springframework.web.bind.annotation.RequestMapping;
+&nbsp;import org.springframework.web.bind.annotation.RestController;
+&nbsp;
+&nbsp;import java.lang.management.ManagementFactory;
+&nbsp;import java.lang.management.ThreadInfo;
+&nbsp;import java.lang.management.ThreadMXBean;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.Map;
+&nbsp;
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;@RestController
+&nbsp;@RequestMapping(&quot;/api/monitor&quot;)
+<b class="fc">&nbsp;@RequiredArgsConstructor</b>
+&nbsp;@Tag(name = &quot;JVM监控模块&quot;, description = &quot;JVM内存、线程、GC监控&quot;)
+&nbsp;public class JvmMonitorController {
+&nbsp;
+&nbsp;    private final JvmMetricsService jvmMetricsService;
+&nbsp;
+&nbsp;    @GetMapping(&quot;/jvm/info&quot;)
+&nbsp;    @Operation(summary = &quot;获取JVM详细信息&quot;)
+&nbsp;    @RequirePermission(&quot;monitor:jvm&quot;)
+&nbsp;    public ResultVO&lt;Map&lt;String, Object&gt;&gt; getJvmInfo() {
+<b class="fc">&nbsp;        Map&lt;String, Object&gt; info = new HashMap&lt;&gt;();</b>
+&nbsp;
+&nbsp;        // JVM基本信息
+<b class="fc">&nbsp;        info.put(&quot;jvm_name&quot;, System.getProperty(&quot;java.vm.name&quot;));</b>
+<b class="fc">&nbsp;        info.put(&quot;jvm_version&quot;, System.getProperty(&quot;java.version&quot;));</b>
+<b class="fc">&nbsp;        info.put(&quot;jvm_vendor&quot;, System.getProperty(&quot;java.vendor&quot;));</b>
+&nbsp;
+&nbsp;        // 运行时信息
+<b class="fc">&nbsp;        info.put(&quot;start_time&quot;, ManagementFactory.getRuntimeMXBean().getStartTime());</b>
+<b class="fc">&nbsp;        info.put(&quot;uptime_ms&quot;, ManagementFactory.getRuntimeMXBean().getUptime());</b>
+&nbsp;
+&nbsp;        // 内存信息
+<b class="fc">&nbsp;        info.put(&quot;memory&quot;, jvmMetricsService.getJvmMemoryInfo());</b>
+&nbsp;
+<b class="fc">&nbsp;        return ResultVO.success(info);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(&quot;/jvm/memory&quot;)
+&nbsp;    @Operation(summary = &quot;获取JVM内存使用详情&quot;)
+&nbsp;    @RequirePermission(&quot;monitor:jvm&quot;)
+&nbsp;    public ResultVO&lt;Map&lt;String, Object&gt;&gt; getJvmMemory() {
+<b class="fc">&nbsp;        return ResultVO.success(jvmMetricsService.getJvmMemoryInfo());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(&quot;/thread/dump&quot;)
+&nbsp;    @Operation(summary = &quot;获取线程堆栈（用于排查死锁和性能问题）&quot;)
+&nbsp;    @RequirePermission(&quot;monitor:jvm&quot;)
+&nbsp;    public ResultVO&lt;Map&lt;String, Object&gt;&gt; getThreadDump() {
+<b class="fc">&nbsp;        Map&lt;String, Object&gt; result = new HashMap&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;        ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();</b>
+&nbsp;
+&nbsp;        // 获取所有线程信息
+<b class="fc">&nbsp;        long[] threadIds = threadMXBean.getAllThreadIds();</b>
+<b class="fc">&nbsp;        result.put(&quot;total_thread_count&quot;, threadIds.length);</b>
+<b class="fc">&nbsp;        result.put(&quot;live_thread_count&quot;, threadMXBean.getThreadCount());</b>
+<b class="fc">&nbsp;        result.put(&quot;peak_thread_count&quot;, threadMXBean.getPeakThreadCount());</b>
+<b class="fc">&nbsp;        result.put(&quot;daemon_thread_count&quot;, threadMXBean.getDaemonThreadCount());</b>
+&nbsp;
+&nbsp;        // 获取线程堆栈（最多前50个）
+<b class="fc">&nbsp;        Map&lt;Long, String&gt; threadStackTraces = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        int count = 0;</b>
+<b class="pc">&nbsp;        for (long threadId : threadIds) {</b>
+<b class="fc">&nbsp;            if (count++ &gt;= 50) break;</b>
+<b class="fc">&nbsp;            ThreadInfo info = threadMXBean.getThreadInfo(threadId);</b>
+<b class="pc">&nbsp;            if (info != null) {</b>
+<b class="fc">&nbsp;                threadStackTraces.put(threadId, info.getThreadName() + &quot; - &quot; + info.getThreadState());</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        result.put(&quot;thread_summaries&quot;, threadStackTraces);</b>
+&nbsp;
+&nbsp;        // 检测死锁
+<b class="fc">&nbsp;        long[] deadlockedThreads = threadMXBean.findDeadlockedThreads();</b>
+<b class="pc">&nbsp;        if (deadlockedThreads != null &amp;&amp; deadlockedThreads.length &gt; 0) {</b>
+<b class="nc">&nbsp;            result.put(&quot;deadlock_detected&quot;, true);</b>
+<b class="nc">&nbsp;            result.put(&quot;deadlock_thread_ids&quot;, deadlockedThreads);</b>
+<b class="nc">&nbsp;            log.warn(&quot;⚠️ 检测到死锁！涉及线程: {}&quot;, deadlockedThreads);</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            result.put(&quot;deadlock_detected&quot;, false);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        return ResultVO.success(result);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-06-15 16:56</div>
+</div>
+</body>
+</html>

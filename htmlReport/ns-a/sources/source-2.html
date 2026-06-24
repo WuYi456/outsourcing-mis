@@ -1,0 +1,199 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > PermissionInterceptor</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.tx.outsourcingmis.interceptor</a>
+</div>
+
+<h1>Coverage Summary for Class: PermissionInterceptor (com.tx.outsourcingmis.interceptor)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PermissionInterceptor</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (15/20)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    85.3%
+  </span>
+  <span class="absValue">
+    (29/34)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.tx.outsourcingmis.interceptor;
+&nbsp;
+&nbsp;import com.tx.outsourcingmis.annotation.RequirePermission;
+&nbsp;import com.tx.outsourcingmis.utils.UserContextHolder;
+&nbsp;import jakarta.servlet.http.HttpServletRequest;
+&nbsp;import jakarta.servlet.http.HttpServletResponse;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.stereotype.Component;
+&nbsp;import org.springframework.web.method.HandlerMethod;
+&nbsp;import org.springframework.web.servlet.HandlerInterceptor;
+&nbsp;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.List;
+&nbsp;
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;@Component
+<b class="fc">&nbsp;@RequiredArgsConstructor</b>
+&nbsp;public class PermissionInterceptor implements HandlerInterceptor {
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+&nbsp;        // 非Controller方法直接放行
+<b class="fc">&nbsp;        if (!(handler instanceof HandlerMethod handlerMethod)) {</b>
+<b class="fc">&nbsp;            return true;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // 获取方法上的权限注解
+<b class="fc">&nbsp;        RequirePermission requirePermission = handlerMethod.getMethodAnnotation(RequirePermission.class);</b>
+<b class="pc">&nbsp;        if (requirePermission == null) {</b>
+&nbsp;            // 获取类上的权限注解
+<b class="fc">&nbsp;            requirePermission = handlerMethod.getBeanType().getAnnotation(RequirePermission.class);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // 没有权限注解，直接放行
+<b class="fc">&nbsp;        if (requirePermission == null) {</b>
+<b class="fc">&nbsp;            return true;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // 获取所需权限列表
+<b class="fc">&nbsp;        String[] requiredPermissions = requirePermission.value();</b>
+&nbsp;
+&nbsp;        // 如果没有指定所需权限，放行
+<b class="pc">&nbsp;        if (requiredPermissions == null || requiredPermissions.length == 0) {</b>
+<b class="nc">&nbsp;            log.warn(&quot;权限注解未指定所需权限，将放行&quot;);</b>
+<b class="nc">&nbsp;            return true;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // 获取当前用户角色
+<b class="fc">&nbsp;        String role = UserContextHolder.getCurrentRole();</b>
+<b class="fc">&nbsp;        if (role == null) {</b>
+<b class="fc">&nbsp;            response.setStatus(401);</b>
+<b class="fc">&nbsp;            throw new RuntimeException(&quot;未登录&quot;);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // 从ThreadLocal获取用户权限列表
+<b class="fc">&nbsp;        List&lt;String&gt; userPermissions = UserContextHolder.getCurrentPermissions();</b>
+&nbsp;
+<b class="pc">&nbsp;        if (userPermissions == null || userPermissions.isEmpty()) {</b>
+<b class="nc">&nbsp;            log.warn(&quot;用户 {} 没有任何权限&quot;, UserContextHolder.getCurrentUsername());</b>
+<b class="nc">&nbsp;            response.setStatus(403);</b>
+<b class="nc">&nbsp;            throw new RuntimeException(&quot;无权限访问，需要以下权限之一: &quot; + String.join(&quot;, &quot;, requiredPermissions));</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // 检查是否拥有所需权限（拥有任意一个即可）
+<b class="fc">&nbsp;        List&lt;String&gt; requiredList = Arrays.asList(requiredPermissions);</b>
+<b class="fc">&nbsp;        for (String permission : userPermissions) {</b>
+<b class="fc">&nbsp;            if (requiredList.contains(permission)) {</b>
+<b class="fc">&nbsp;                log.debug(&quot;权限校验通过 - 用户: {}, 角色: {}, 所需权限: {}&quot;,</b>
+<b class="fc">&nbsp;                        UserContextHolder.getCurrentUsername(), role, permission);</b>
+<b class="fc">&nbsp;                return true;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;
+&nbsp;        // 无权限
+<b class="fc">&nbsp;        log.warn(&quot;权限校验失败 - 用户: {}, 角色: {}, 所需权限: {}, 拥有权限: {}&quot;,</b>
+<b class="fc">&nbsp;                UserContextHolder.getCurrentUsername(), role,</b>
+<b class="fc">&nbsp;                String.join(&quot;, &quot;, requiredPermissions),</b>
+<b class="fc">&nbsp;                String.join(&quot;, &quot;, userPermissions));</b>
+<b class="fc">&nbsp;        response.setStatus(403);</b>
+<b class="fc">&nbsp;        throw new RuntimeException(&quot;无权限访问，需要以下权限之一: &quot; + String.join(&quot;, &quot;, requiredPermissions));</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-06-15 16:56</div>
+</div>
+</body>
+</html>

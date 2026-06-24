@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>上岗申请 - 外包人员管理系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar-brand { font-weight: 700; }
+        .nav-link.active { background: rgba(255,255,255,0.15); border-radius: 8px; font-weight: 600; }
+        .card { border-radius: 12px; }
+        .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    </style>
+</head>
+<body>
+<!-- ===== 导航栏 ===== -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="/dashboard">
+            <i class="bi bi-people-fill me-2"></i>外包人员管理系统
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" href="/dashboard"><i class="bi bi-speedometer2 me-1"></i>仪表盘</a></li>
+                <li class="nav-item"><a class="nav-link" href="/user-management"><i class="bi bi-people me-1"></i>用户管理</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/applications"><i class="bi bi-file-earmark-text me-1"></i>上岗申请</a></li>
+                <li class="nav-item"><a class="nav-link" href="/approval"><i class="bi bi-check2-circle me-1"></i>审批管理</a></li>
+                <li class="nav-item"><a class="nav-link" href="/performance"><i class="bi bi-star me-1"></i>绩效管理</a></li>
+                <li class="nav-item"><a class="nav-link" href="/logs"><i class="bi bi-clock-history me-1"></i>操作日志</a></li>
+            </ul>
+            <div class="d-flex align-items-center">
+                <span class="text-white me-3"><i class="bi bi-person-circle me-1"></i><span id="usernameDisplay">用户</span></span>
+                <button class="btn btn-outline-light btn-sm" onclick="logout()"><i class="bi bi-box-arrow-right"></i> 退出</button>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- ===== 主内容 ===== -->
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4><i class="bi bi-file-earmark-text me-2 text-primary"></i>我的上岗申请</h4>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#submitModal">
+            <i class="bi bi-plus-circle me-1"></i>提交申请
+        </button>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                    <tr>
+                        <th style="width:60px;">ID</th>
+                        <th>申请理由</th>
+                        <th style="width:120px;">审批人</th>
+                        <th style="width:100px;">状态</th>
+                        <th style="width:170px;">申请时间</th>
+                        <th style="width:100px;">操作</th>
+                    </tr>
+                    </thead>
+                    <tbody id="applicationTableBody">
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-3">加载中...</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 提交申请弹窗 ===== -->
+<div class="modal fade" id="submitModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-file-earmark-text me-2 text-primary"></i>提交上岗申请</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="submitForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">申请理由 <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="reason" rows="3" placeholder="请填写申请理由" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">备注</label>
+                        <input type="text" class="form-control" id="remark" placeholder="可选备注">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button class="btn btn-primary" onclick="submitApplication()"><i class="bi bi-send me-1"></i>提交</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // ===== 全局变量 =====
+    const TOKEN = localStorage.getItem('token');
+    if (!TOKEN) window.location.href = '/login';
+    document.getElementById('usernameDisplay').textContent = localStorage.getItem('username') || '用户';
+
+    // ===== 页面加载 =====
+    loadApplications();
+
+    // ===== 加载申请列表 =====
+    async function loadApplications() {
+        try {
+            const res = await fetch('/api/job-application/my-list', {
+                headers: { 'Authorization': 'Bearer ' + TOKEN }
+            });
+            const result = await res.json();
+            const tbody = document.getElementById('applicationTableBody');
+
+            if (result.code === 200 && result.data && result.data.length > 0) {
+                tbody.innerHTML = result.data.map(app => `
+                        <tr>
+                            <td>#${app.id}</td>
+                            <td>${app.reason || '-'}</td>
+                            <td>${app.approverName || '待分配'}</td>
+                            <td><span class="status-badge ${getStatusClass(app.status)}">${app.statusDesc}</span></td>
+                            <td>${app.applyTime ? app.applyTime.replace('T', ' ') : '-'}</td>
+                            <td>
+                                ${app.status === 0 ? `<button class="btn btn-sm btn-outline-danger" onclick="cancelApp(${app.id})"><i class="bi bi-x-circle"></i> 取消</button>` : '-'}
+                            </td>
+                        </tr>
+                    `).join('');
+            } else {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">暂无申请记录</td></tr>';
+            }
+        } catch (e) {
+            console.error('加载失败', e);
+        }
+    }
+
+    // ===== 状态样式 =====
+    function getStatusClass(status) {
+        const map = {
+            0: 'bg-warning text-dark',
+            1: 'bg-success text-white',
+            2: 'bg-danger text-white'
+        };
+        return map[status] || 'bg-secondary text-white';
+    }
+
+    // ===== 提交申请 =====
+    async function submitApplication() {
+        const reason = document.getElementById('reason').value.trim();
+        if (!reason) {
+            alert('请填写申请理由');
+            document.getElementById('reason').focus();
+            return;
+        }
+        const remark = document.getElementById('remark').value.trim();
+
+        try {
+            const res = await fetch('/api/job-application/submit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + TOKEN
+                },
+                body: JSON.stringify({ reason, remark })
+            });
+            const result = await res.json();
+            if (result.code === 200) {
+                alert('✅ 申请提交成功！');
+                document.getElementById('submitForm').reset();
+                bootstrap.Modal.getInstance(document.getElementById('submitModal')).hide();
+                loadApplications();
+            } else {
+                alert('❌ ' + result.msg);
+            }
+        } catch (e) {
+            alert('网络错误，请稍后重试');
+        }
+    }
+
+    // ===== 取消申请 =====
+    async function cancelApp(id) {
+        if (!confirm('确定要取消此申请吗？')) return;
+        try {
+            const res = await fetch(`/api/job-application/cancel/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + TOKEN }
+            });
+            const result = await res.json();
+            if (result.code === 200) {
+                alert('✅ 已取消');
+                loadApplications();
+            } else {
+                alert('❌ ' + result.msg);
+            }
+        } catch (e) {
+            alert('网络错误');
+        }
+    }
+
+    // ===== 退出登录 =====
+    function logout() {
+        localStorage.clear();
+        window.location.href = '/login';
+    }
+</script>
+</body>
+</html>

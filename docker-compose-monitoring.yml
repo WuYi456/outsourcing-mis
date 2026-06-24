@@ -1,0 +1,78 @@
+# ============================================================
+# Docker Compose 配置 - 监控服务
+# ============================================================
+#
+# 启动命令：docker-compose up -d
+# 停止命令：docker-compose down
+#
+# 服务说明：
+#   - Prometheus：指标采集和存储，端口 9095
+#   - Grafana：数据可视化面板，端口 3005（账号/密码：admin/admin）
+#   - Node Exporter：宿主机系统指标采集，端口 9105
+# ============================================================
+
+services:
+  # ---------- Prometheus 指标采集 ----------
+  prometheus:
+    image: prom/prometheus:v2.53.0          # 锁定版本，避免兼容性问题
+    container_name: prometheus
+    ports:
+      - "9095:9090"                         # 宿主机端口:容器端口
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro   # 配置文件（只读）
+      - prometheus_data:/prometheus         # 数据持久化
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'            # 支持热加载配置
+    restart: unless-stopped
+    networks:
+      - monitoring
+    extra_hosts:
+      - "host.docker.internal:host-gateway" # 允许容器访问宿主机服务
+
+  # ---------- Grafana 可视化面板 ----------
+  grafana:
+    image: grafana/grafana:11.1.0           # 锁定版本
+    container_name: grafana
+    ports:
+      - "3005:3000"                         # 宿主机端口:容器端口
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin    # 管理员密码（默认 admin/admin）
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    volumes:
+      - grafana_data:/var/lib/grafana       # 数据持久化
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources:ro   # 数据源自动配置
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    networks:
+      - monitoring
+
+  # ---------- Node Exporter 宿主机监控 ----------
+  node-exporter:
+    image: prom/node-exporter:v1.8.0        # 锁定版本
+    container_name: node-exporter
+    ports:
+      - "9105:9100"                         # 宿主机端口:容器端口
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+    restart: unless-stopped
+    networks:
+      - monitoring
+
+# ---------- 数据卷 ----------
+volumes:
+  prometheus_data:                          # Prometheus 数据持久化
+  grafana_data:                             # Grafana 数据持久化
+
+# ---------- 网络 ----------
+networks:
+  monitoring:
+    driver: bridge

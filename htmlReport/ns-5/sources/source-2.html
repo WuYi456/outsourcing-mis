@@ -1,0 +1,171 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > JobApplicationController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.tx.outsourcingmis.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: JobApplicationController (com.tx.outsourcingmis.controller)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">JobApplicationController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (10/10)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">JobApplicationController$$SpringCGLIB$$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (10/10)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.tx.outsourcingmis.controller;
+&nbsp;
+&nbsp;import com.tx.outsourcingmis.annotation.RequirePermission;
+&nbsp;import com.tx.outsourcingmis.common.ResultVO;
+&nbsp;import com.tx.outsourcingmis.dto.JobApplicationRequest;
+&nbsp;import com.tx.outsourcingmis.dto.JobApplicationResponse;
+&nbsp;import com.tx.outsourcingmis.service.JobApplicationService;
+&nbsp;import io.swagger.v3.oas.annotations.Operation;
+&nbsp;import io.swagger.v3.oas.annotations.tags.Tag;
+&nbsp;import jakarta.validation.Valid;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;@RestController
+&nbsp;@RequestMapping(&quot;/api/job-application&quot;)
+<b class="fc">&nbsp;@RequiredArgsConstructor</b>
+&nbsp;@Tag(name = &quot;上岗申请模块&quot;, description = &quot;测试外包人员上岗申请相关接口&quot;)
+&nbsp;public class JobApplicationController {
+&nbsp;
+&nbsp;    private final JobApplicationService jobApplicationService;
+&nbsp;
+&nbsp;    @PostMapping(&quot;/submit&quot;)
+&nbsp;    @Operation(summary = &quot;提交上岗申请&quot;)
+&nbsp;    @RequirePermission(&quot;job:submit&quot;)
+&nbsp;    public ResultVO&lt;JobApplicationResponse&gt; submitApplication(@Valid @RequestBody JobApplicationRequest request) {
+<b class="fc">&nbsp;        JobApplicationResponse response = jobApplicationService.submitApplication(request);</b>
+<b class="fc">&nbsp;        return ResultVO.success(response);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(&quot;/my-list&quot;)
+&nbsp;    @Operation(summary = &quot;获取我的申请列表&quot;)
+&nbsp;    @RequirePermission(&quot;job:view&quot;)
+&nbsp;    public ResultVO&lt;List&lt;JobApplicationResponse&gt;&gt; getMyApplications() {
+<b class="fc">&nbsp;        List&lt;JobApplicationResponse&gt; list = jobApplicationService.getMyApplications();</b>
+<b class="fc">&nbsp;        return ResultVO.success(list);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(&quot;/detail/{id}&quot;)
+&nbsp;    @Operation(summary = &quot;获取申请详情&quot;)
+&nbsp;    @RequirePermission(&quot;job:view&quot;)
+&nbsp;    public ResultVO&lt;JobApplicationResponse&gt; getApplicationDetail(@PathVariable Long id) {
+<b class="fc">&nbsp;        JobApplicationResponse response = jobApplicationService.getApplicationDetail(id);</b>
+<b class="fc">&nbsp;        return ResultVO.success(response);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @DeleteMapping(&quot;/cancel/{id}&quot;)
+&nbsp;    @Operation(summary = &quot;取消申请（仅待审批状态可取消）&quot;)
+&nbsp;    @RequirePermission(&quot;job:cancel&quot;)
+&nbsp;    public ResultVO&lt;Void&gt; cancelApplication(@PathVariable Long id) {
+<b class="fc">&nbsp;        jobApplicationService.cancelApplication(id);</b>
+<b class="fc">&nbsp;        return ResultVO.success();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-06-15 16:56</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,196 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > ApprovalController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.tx.outsourcingmis.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: ApprovalController (com.tx.outsourcingmis.controller)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ApprovalController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (22/22)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ApprovalController$$SpringCGLIB$$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (22/22)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.tx.outsourcingmis.controller;
+&nbsp;
+&nbsp;import com.github.pagehelper.PageInfo;
+&nbsp;import com.tx.outsourcingmis.annotation.RequirePermission;
+&nbsp;import com.tx.outsourcingmis.common.ResultVO;
+&nbsp;import com.tx.outsourcingmis.dto.ApprovalRequest;
+&nbsp;import com.tx.outsourcingmis.dto.ApprovalResponse;
+&nbsp;import com.tx.outsourcingmis.service.ApprovalService;
+&nbsp;import io.swagger.v3.oas.annotations.Operation;
+&nbsp;import io.swagger.v3.oas.annotations.tags.Tag;
+&nbsp;import jakarta.validation.Valid;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;@RestController
+&nbsp;@RequestMapping(&quot;/api/approval&quot;)
+<b class="fc">&nbsp;@RequiredArgsConstructor</b>
+&nbsp;@Tag(name = &quot;审批模块&quot;, description = &quot;领导审批上岗申请&quot;)
+&nbsp;public class ApprovalController {
+&nbsp;
+&nbsp;    private final ApprovalService approvalService;
+&nbsp;
+&nbsp;    // 添加一个简单的测试接口
+&nbsp;    @GetMapping(&quot;/test&quot;)
+&nbsp;    @Operation(summary = &quot;测试Controller是否加载&quot;)
+&nbsp;    public ResultVO&lt;String&gt; test() {
+<b class="fc">&nbsp;        log.info(&quot;✅ ApprovalController 测试接口被调用！&quot;);</b>
+<b class="fc">&nbsp;        return ResultVO.success(&quot;Controller is working!&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(&quot;/pending&quot;)
+&nbsp;    @Operation(summary = &quot;分页查询待审批列表&quot;)
+&nbsp;    @RequirePermission(&quot;approval:view&quot;)
+&nbsp;    public ResultVO&lt;PageInfo&lt;ApprovalResponse&gt;&gt; getPendingList(
+&nbsp;            @RequestParam(defaultValue = &quot;1&quot;) Integer pageNum,
+&nbsp;            @RequestParam(defaultValue = &quot;10&quot;) Integer pageSize) {
+<b class="fc">&nbsp;        log.info(&quot;收到待审批列表查询请求: pageNum={}, pageSize={}&quot;, pageNum, pageSize);</b>
+<b class="fc">&nbsp;        PageInfo&lt;ApprovalResponse&gt; pageInfo = approvalService.getPendingList(pageNum, pageSize);</b>
+<b class="fc">&nbsp;        return ResultVO.success(pageInfo);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PostMapping(&quot;/approve&quot;)
+&nbsp;    @Operation(summary = &quot;审批通过&quot;)
+&nbsp;    @RequirePermission(&quot;approval:approve&quot;)
+&nbsp;    public ResultVO&lt;Void&gt; approve(@Valid @RequestBody ApprovalRequest request) {
+<b class="fc">&nbsp;        log.info(&quot;收到审批通过请求: applicationId={}&quot;, request.getApplicationId());</b>
+<b class="fc">&nbsp;        approvalService.approve(request);</b>
+<b class="fc">&nbsp;        return ResultVO.success();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PostMapping(&quot;/batch-approve&quot;)
+&nbsp;    @Operation(summary = &quot;批量审批通过&quot;)
+&nbsp;    @RequirePermission(&quot;approval:approve&quot;)
+&nbsp;    public ResultVO&lt;Void&gt; batchApprove(@Valid @RequestBody ApprovalRequest request) {
+<b class="fc">&nbsp;        log.info(&quot;收到批量审批通过请求: applicationIds={}, selectAll={}&quot;,</b>
+<b class="fc">&nbsp;                request.getApplicationIds(), request.getSelectAll());</b>
+<b class="fc">&nbsp;        approvalService.batchApprove(request);</b>
+<b class="fc">&nbsp;        return ResultVO.success();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PostMapping(&quot;/reject&quot;)
+&nbsp;    @Operation(summary = &quot;审批拒绝&quot;)
+&nbsp;    @RequirePermission(&quot;approval:reject&quot;)
+&nbsp;    public ResultVO&lt;Void&gt; reject(@Valid @RequestBody ApprovalRequest request) {
+<b class="fc">&nbsp;        log.info(&quot;收到审批拒绝请求: applicationId={}, reason={}&quot;,</b>
+<b class="fc">&nbsp;                request.getApplicationId(), request.getRejectReason());</b>
+<b class="fc">&nbsp;        approvalService.reject(request);</b>
+<b class="fc">&nbsp;        return ResultVO.success();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PostMapping(&quot;/batch-reject&quot;)
+&nbsp;    @Operation(summary = &quot;批量审批拒绝&quot;)
+&nbsp;    @RequirePermission(&quot;approval:reject&quot;)
+&nbsp;    public ResultVO&lt;Void&gt; batchReject(@Valid @RequestBody ApprovalRequest request) {
+<b class="fc">&nbsp;        log.info(&quot;收到批量审批拒绝请求: applicationIds={}, selectAll={}, reason={}&quot;,</b>
+<b class="fc">&nbsp;                request.getApplicationIds(), request.getSelectAll(), request.getRejectReason());</b>
+<b class="fc">&nbsp;        approvalService.batchReject(request);</b>
+<b class="fc">&nbsp;        return ResultVO.success();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-06-15 16:56</div>
+</div>
+</body>
+</html>

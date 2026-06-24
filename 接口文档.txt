@@ -1,0 +1,538 @@
+基础路径: http://localhost:8080
+
+200：成功
+400：参数校验失败
+401：未登录 / Token无效
+403：无权限访问
+500：业务错误 / 系统异常
+
+---------------------------------------------------
+一、用户模块 /api/user
+
+1.1 用户注册
+POST /api/user/register
+权限: 无
+
+请求体:
+{
+    "username": "testuser",
+    "password": "123456",
+    "realName": "123",
+    "email": "test123@example.com",
+    "phone": "12321212321",
+    "role": "EMPLOYEE",
+    "leaderId": 1
+}
+
+成功响应:
+{"code":200,"msg":"success","data":null}
+
+失败响应:
+{"code":500,"msg":"用户名已存在","data":null}
+
+
+1.2 用户登录
+POST /api/user/login
+权限: 无
+
+请求体:
+{
+    "username": "admin",
+    "password": "123456"
+}
+
+成功响应:
+{
+    "code": 200,
+    "msg": "success",
+    "data": {
+        "token": "eyJhbGciOiJIUzUxMiJ9...",
+        "userId": 1,
+        "username": "admin",
+        "role": "ADMIN",
+        "permissions": ["user:view", "user:manage", ...]
+    }
+}
+
+
+1.3 用户登出
+POST /api/user/logout
+权限: 需登录
+请求体: 无
+成功响应: {"code":200,"msg":"success","data":null}
+
+
+1.4 获取当前用户信息
+GET /api/user/current
+权限: 需登录
+请求体: 无
+
+成功响应:
+{
+    "code": 200,
+    "msg": "success",
+    "data": {
+        "id": 1,
+        "username": "admin",
+        "realName": "管理员",
+        "email": "admin123@example.com",
+        "phone": "123123213230",
+        "role": "ADMIN",
+        "status": 1,
+        "leaderId": null
+    }
+}
+
+
+1.5 根据用户名查询用户
+GET /api/user/info/{username}
+权限: user:view
+路径参数: username - 用户名
+
+成功响应:
+{
+    "code": 200,
+    "msg": "success",
+    "data": {
+        "id": 2,
+        "username": "testuser",
+        "realName": "testuser",
+        "role": "EMPLOYEE",
+        "status": 1
+    }
+}
+
+
+1.6 分页查询用户列表
+GET /api/user/list?pageNum=1&pageSize=10
+权限: user:view
+
+请求参数:
+pageNum - 页码，默认1
+pageSize - 每页大小，默认10
+
+成功响应:
+{
+    "code": 200,
+    "msg": "success",
+    "data": {
+        "total": 38,
+        "pages": 4,
+        "pageNum": 1,
+        "pageSize": 10,
+        "list": [...]
+    }
+}
+
+
+------------------------------------------------------------------------
+二、上岗申请模块 /api/job-application
+
+
+2.1 提交上岗申请
+POST /api/job-application/submit
+权限: job:submit
+
+请求体:
+{
+    "reason": "需要上岗处理项目任务",
+    "remark": "项目周期3个月"
+}
+
+成功响应:
+{
+    "code": 200,
+    "msg": "success",
+    "data": {
+        "id": 1,
+        "applicantId": 2,
+        "applicantName": "testuser",
+        "approverId": 1,
+        "approverName": "管理员",
+        "reason": "需要上岗处理项目任务",
+        "status": 0,
+        "statusDesc": "待审批",
+        "rejectReason": null,
+        "remark": "项目周期3个月",
+        "applyTime": "2026-06-20 10:00:00",
+        "approveTime": null
+    }
+}
+
+
+2.2 获取我的申请列表
+GET /api/job-application/my-list
+权限: job:view
+请求体: 无
+
+成功响应:
+{
+    "code": 200,
+    "msg": "success",
+    "data": [
+        {
+            "id": 1,
+            "applicantName": "testuser",
+            "reason": "需要上岗处理项目任务",
+            "status": 0,
+            "statusDesc": "待审批",
+            "applyTime": "2026-06-20 10:00:00"
+        }
+    ]
+}
+
+
+2.3 获取申请详情
+GET /api/job-application/detail/{id}
+权限: job:view
+路径参数: id - 申请ID
+
+
+2.4 取消申请
+DELETE /api/job-application/cancel/{id}
+权限: job:cancel
+限制: 仅待审批状态可取消，仅限本人操作
+路径参数: id - 申请ID
+
+成功响应: {"code":200,"msg":"success","data":null}
+
+
+----------------------------------------------------------------------
+三、审批模块 /api/approval
+
+
+3.1 查询待审批列表
+GET /api/approval/pending?pageNum=1&pageSize=10
+权限: approval:view
+
+请求参数:
+pageNum - 页码，默认1
+pageSize - 每页大小，默认10
+
+成功响应:
+{
+    "code": 200,
+    "msg": "success",
+    "data": {
+        "total": 4,
+        "pages": 1,
+        "pageNum": 1,
+        "pageSize": 10,
+        "list": [
+            {
+                "id": 1,
+                "applicantName": "testuser",
+                "reason": "需要上岗处理项目任务",
+                "applyTime": "2026-06-20 10:00:00",
+                "status": 0
+            }
+        ]
+    }
+}
+
+
+3.2 审批通过（单个）
+POST /api/approval/approve
+权限: approval:approve
+
+请求体:
+{"applicationId": 1} 
+
+成功响应: {"code":200,"msg":"success","data":null}
+
+
+3.3 批量审批通过
+POST /api/approval/batch-approve
+权限: approval:approve
+
+请求体(指定ID):
+{"applicationIds": [1, 2, 3]}
+
+请求体(全选):
+{"selectAll": true}
+
+
+3.4 审批拒绝（单个）
+POST /api/approval/reject
+权限: approval:reject
+
+请求体:
+{
+    "applicationId": 1,
+    "rejectReason": "理由不充分"
+}
+
+
+3.5 批量审批拒绝
+POST /api/approval/batch-reject
+权限: approval:reject
+
+请求体:
+{
+    "applicationIds": [1, 2, 3],
+    "rejectReason": "名额已满" 
+}
+
+或
+{
+    "selectAll": true,
+    "rejectReason": "名额已满"
+}
+
+
+3.6 获取审批统计
+GET /api/approval/statistics
+权限: approval:view
+请求体: 无
+
+成功响应:
+{
+    "code": 200,
+    "msg": "success",
+    "data": {
+        "pending": 4,
+        "approved": 6, 
+        "rejected": 4 
+    }
+}
+
+
+-----------------------------------------------------------------
+四、绩效管理模块 /api/performance
+
+
+4.1 评定绩效
+POST /api/performance/evaluate
+权限: performance:grade
+说明: 使用分布式锁防止并发
+
+请求体:
+{
+    "userId": 2,
+    "grade": "A",
+    "comment": "工作表现优秀", 
+    "evaluateYear": 2026, 
+    "evaluateMonth": 6 
+}
+
+等级说明: A-优秀, B-良好, C-合格, D-待提升, E-不合格
+
+成功响应:
+{
+    "code": 200,
+    "msg": "success",
+    "data": {
+        "id": 1,
+        "userId": 2,
+        "userName": "testuser",
+        "evaluatorId": 1,
+        "evaluatorName": "管理员",
+        "grade": "A",
+        "gradeDesc": "优秀",
+        "comment": "工作表现优秀",
+        "evaluateYear": 2026,
+        "evaluateMonth": 6,
+        "status": 0,
+        "statusDesc": "待确认",
+        "createTime": "2026-06-20 10:00:00",
+        "updateTime": null
+    }
+}
+
+
+4.2 确认绩效
+PUT /api/performance/confirm/{performanceId}
+权限: performance:grade
+限制: 仅评定人本人可确认
+路径参数: performanceId - 绩效ID
+
+成功响应: {"code":200,"msg":"success","data":null}
+
+
+4.3 获取用户绩效列表
+GET /api/performance/user/{userId}
+权限: performance:view
+路径参数: userId - 用户ID
+
+
+4.4 获取月度绩效汇总
+GET /api/performance/period?year=2026&month=6
+权限: performance:view
+
+请求参数:
+year - 年份
+month - 月份
+
+
+--------------------------------------------------------------------
+五、操作日志模块 /api/log
+
+
+5.1 高级搜索日志
+POST /api/log/search
+权限: log:view
+
+请求体:
+{
+    "username": "admin",
+    "operation": "UserController.login", 
+    "startTime": "2026-06-01 00:00:00",
+    "endTime": "2026-06-30 23:59:59",
+    "pageNum": 1, 
+    "pageSize": 20 
+}
+
+成功响应:
+{
+    "code": 200,
+    "msg": "success",
+    "data": {
+        "content": [
+            {
+                "id": "uuid-xxx",
+                "userId": 1,
+                "username": "admin",
+                "operation": "UserController.login",
+                "method": "POST /api/user/login",
+                "params": "{\"username\":\"admin\"}",
+                "result": "{\"token\":\"...\"}",
+                "ip": "127.0.0.1",
+                "duration": 156,
+                "success": true,
+                "errorMsg": null,
+                "createTime": "2026-06-20 10:00:00"
+            }
+        ],
+        "totalElements": 100,
+        "totalPages": 5,
+        "size": 20,
+        "number": 0
+    }
+}
+
+
+5.2 按用户名查询日志
+GET /api/log/user/{username}?pageNum=1&pageSize=20
+权限: log:view
+路径参数: username - 用户名
+
+
+5.3 按操作类型查询日志
+GET /api/log/operation/{operation}?pageNum=1&pageSize=20
+权限: log:view
+路径参数: operation - 操作类型
+
+
+5.4 查询日志详情
+GET /api/log/{id}
+权限: log:view
+路径参数: id - 日志ID
+
+
+5.5 删除日志
+DELETE /api/log/{id}
+权限: log:delete
+路径参数: id - 日志ID
+
+
+---------------------------------------------------------------
+六、监控模块 /api/monitor
+
+
+6.1 Redis健康检查
+GET /api/monitor/redis/health
+权限: 无
+
+成功响应: {"code":200,"msg":"success","data":true}
+
+
+6.2 RabbitMQ健康检查
+GET /api/monitor/rabbitmq/health
+权限: 无
+
+成功响应: {"code":200,"msg":"success","data":true}
+
+
+6.3 RabbitMQ队列大小
+GET /api/monitor/rabbitmq/queue-size
+权限: 无
+
+成功响应: {"code":200,"msg":"success","data":5}
+
+
+6.4 JVM详细信息
+GET /api/monitor/jvm/info
+权限: monitor:jvm
+
+成功响应:
+{
+    "code": 200,
+    "msg": "success",
+    "data": {
+        "jvm_name": "OpenJDK 64-Bit Server VM",
+        "jvm_version": "17.0.5",
+        "jvm_vendor": "Eclipse Adoptium",
+        "start_time": 1700000000000,
+        "uptime_ms": 3600000,
+        "memory": {
+            "heap_used_bytes": 256000000,
+            "heap_max_bytes": 1024000000,
+            "heap_used_percent": 25.0,
+            "nonheap_used_bytes": 80000000,
+            "nonheap_max_bytes": 256000000,
+            "nonheap_used_percent": 31.25,
+            "thread_count": 25,
+            "peak_thread_count": 30,
+            "gc_count": 10,
+            "gc_total_time_ms": 120,
+            "system_load_average": 0.5,
+            "available_processors": 8
+        }
+    }
+}
+
+
+6.5 JVM内存详情
+GET /api/monitor/jvm/memory
+权限: monitor:jvm
+
+
+6.6 线程堆栈
+GET /api/monitor/thread/dump
+权限: monitor:jvm
+
+成功响应:
+{
+    "code": 200,
+    "msg": "success",
+    "data": {
+        "live_thread_count": 25,
+        "peak_thread_count": 30,
+        "daemon_thread_count": 10,
+        "thread_summaries": {
+            "1": "main - RUNNABLE",
+            "2": "Reference Handler - WAITING"
+        },
+        "deadlock_detected": false
+    }
+}
+
+
+------------------------------------------------------------------------
+权限列表
+
+权限标识                       说明                         拥有角色
+user:view                      查看用户信息            ADMIN, MANAGER
+user:manage                 管理用户                  ADMIN
+performance:view         查看绩效                  ADMIN, MANAGER, EMPLOYEE
+performance:grade       评定/确认绩效           ADMIN, MANAGER
+job:submit                    提交上岗申请            ADMIN, MANAGER, EMPLOYEE
+job:view             	    查看申请                  ADMIN, MANAGER, EMPLOYEE
+job:cancel          	    取消申请                  ADMIN, MANAGER, EMPLOYEE
+approval:view       	    查看待审批               ADMIN, MANAGER
+approval:approve    	    审批通过                  ADMIN, MANAGER
+approval:reject              审批拒绝                  ADMIN, MANAGER
+log:view           		    查看操作日志            ADMIN, MANAGER
+log:delete         	    删除操作日志            ADMIN
+monitor:jvm       	    JVM监控                  ADMIN
+

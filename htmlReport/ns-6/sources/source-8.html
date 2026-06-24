@@ -1,0 +1,143 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > OperationLogQueryRequest</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.tx.outsourcingmis.dto</a>
+</div>
+
+<h1>Coverage Summary for Class: OperationLogQueryRequest (com.tx.outsourcingmis.dto)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OperationLogQueryRequest</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/54)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.tx.outsourcingmis.dto;
+&nbsp;
+&nbsp;import io.swagger.v3.oas.annotations.media.Schema;
+&nbsp;import lombok.Data;
+&nbsp;
+<b class="pc">&nbsp;@Data</b>
+&nbsp;@Schema(description = &quot;操作日志查询请求&quot;)
+&nbsp;public class OperationLogQueryRequest {
+&nbsp;
+&nbsp;    @Schema(description = &quot;用户名&quot;)
+<b class="fc">&nbsp;    private String username;</b>
+&nbsp;
+&nbsp;    @Schema(description = &quot;操作类型&quot;)
+<b class="fc">&nbsp;    private String operation;</b>
+&nbsp;
+&nbsp;    @Schema(description = &quot;开始时间 yyyy-MM-dd HH:mm:ss&quot;)
+<b class="fc">&nbsp;    private String startTime;</b>
+&nbsp;
+&nbsp;    @Schema(description = &quot;结束时间 yyyy-MM-dd HH:mm:ss&quot;)
+<b class="fc">&nbsp;    private String endTime;</b>
+&nbsp;
+<b class="fc">&nbsp;    @Schema(description = &quot;页码&quot;, defaultValue = &quot;1&quot;)</b>
+<b class="fc">&nbsp;    private Integer pageNum = 1;</b>
+&nbsp;
+<b class="fc">&nbsp;    @Schema(description = &quot;每页大小&quot;, defaultValue = &quot;20&quot;)</b>
+<b class="fc">&nbsp;    private Integer pageSize = 20;</b>
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-06-15 16:56</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,346 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > ApprovalService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.tx.outsourcingmis.service</a>
+</div>
+
+<h1>Coverage Summary for Class: ApprovalService (com.tx.outsourcingmis.service)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ApprovalService</td>
+<td class="coverageStat">
+  <span class="percent">
+    90%
+  </span>
+  <span class="absValue">
+    (9/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    42.3%
+  </span>
+  <span class="absValue">
+    (33/78)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    71.3%
+  </span>
+  <span class="absValue">
+    (72/101)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ApprovalService$$SpringCGLIB$$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    90%
+  </span>
+  <span class="absValue">
+    (9/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    42.3%
+  </span>
+  <span class="absValue">
+    (33/78)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    71.3%
+  </span>
+  <span class="absValue">
+    (72/101)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.tx.outsourcingmis.service;
+&nbsp;
+&nbsp;import com.github.pagehelper.PageHelper;
+&nbsp;import com.github.pagehelper.PageInfo;
+&nbsp;import com.tx.outsourcingmis.dto.ApprovalNotificationMessage;
+&nbsp;import com.tx.outsourcingmis.dto.ApprovalRequest;
+&nbsp;import com.tx.outsourcingmis.dto.ApprovalResponse;
+&nbsp;import com.tx.outsourcingmis.entity.JobApplication;
+&nbsp;import com.tx.outsourcingmis.entity.User;
+&nbsp;import com.tx.outsourcingmis.mapper.JobApplicationMapper;
+&nbsp;import com.tx.outsourcingmis.mapper.UserMapper;
+&nbsp;import com.tx.outsourcingmis.utils.UserContextHolder;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;import org.springframework.util.StringUtils;
+&nbsp;
+&nbsp;import java.time.LocalDateTime;
+&nbsp;import java.util.List;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;@Service
+<b class="fc">&nbsp;@RequiredArgsConstructor</b>
+&nbsp;public class ApprovalService {
+&nbsp;
+&nbsp;    private final JobApplicationMapper jobApplicationMapper;
+&nbsp;    private final UserMapper userMapper;
+&nbsp;    private final NotificationService notificationService;
+&nbsp;
+&nbsp;    public PageInfo&lt;ApprovalResponse&gt; getPendingList(Integer pageNum, Integer pageSize) {
+<b class="fc">&nbsp;        Long currentUserId = UserContextHolder.getCurrentUserId();</b>
+<b class="fc">&nbsp;        log.info(&quot;查询待审批列表，当前用户ID: {}&quot;, currentUserId);</b>
+&nbsp;
+<b class="pc">&nbsp;        if (currentUserId == null) {</b>
+<b class="nc">&nbsp;            throw new RuntimeException(&quot;用户未登录&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        PageHelper.startPage(pageNum, pageSize);</b>
+<b class="fc">&nbsp;        List&lt;JobApplication&gt; applications = jobApplicationMapper.selectPendingByApproverId(currentUserId);</b>
+&nbsp;
+&nbsp;        // 获取分页信息
+<b class="fc">&nbsp;        PageInfo&lt;JobApplication&gt; pageInfo = new PageInfo&lt;&gt;(applications);</b>
+&nbsp;
+<b class="fc">&nbsp;        List&lt;ApprovalResponse&gt; responses = applications.stream()</b>
+<b class="fc">&nbsp;                .map(this::convertToResponse)</b>
+<b class="fc">&nbsp;                .collect(Collectors.toList());</b>
+&nbsp;
+&nbsp;        // 构建带分页信息的响应
+<b class="fc">&nbsp;        PageInfo&lt;ApprovalResponse&gt; resultPage = new PageInfo&lt;&gt;(responses);</b>
+<b class="fc">&nbsp;        resultPage.setTotal(pageInfo.getTotal());</b>
+<b class="fc">&nbsp;        resultPage.setPages(pageInfo.getPages());</b>
+<b class="fc">&nbsp;        resultPage.setPageNum(pageInfo.getPageNum());</b>
+<b class="fc">&nbsp;        resultPage.setPageSize(pageInfo.getPageSize());</b>
+&nbsp;
+<b class="fc">&nbsp;        return resultPage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    public void approve(ApprovalRequest request) {
+&nbsp;        // 参数校验
+<b class="pc">&nbsp;        if (request.getApplicationId() == null &amp;&amp;</b>
+<b class="nc">&nbsp;                (request.getApplicationIds() == null || request.getApplicationIds().isEmpty()) &amp;&amp;</b>
+<b class="nc">&nbsp;                !Boolean.TRUE.equals(request.getSelectAll())) {</b>
+<b class="nc">&nbsp;            throw new RuntimeException(&quot;请选择要审批的申请&quot;);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // 单个审批
+<b class="pc">&nbsp;        if (request.getApplicationId() != null) {</b>
+<b class="fc">&nbsp;            doApprove(request.getApplicationId(), true, null);</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;
+&nbsp;        // 批量审批
+<b class="nc">&nbsp;        List&lt;Long&gt; ids = getApplicationIds(request);</b>
+<b class="nc">&nbsp;        if (ids == null || ids.isEmpty()) {</b>
+<b class="nc">&nbsp;            throw new RuntimeException(&quot;请选择要审批的申请&quot;);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        for (Long id : ids) {</b>
+<b class="nc">&nbsp;            doApprove(id, true, null);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    public void batchApprove(ApprovalRequest request) {
+<b class="fc">&nbsp;        List&lt;Long&gt; ids = getApplicationIds(request);</b>
+<b class="pc">&nbsp;        if (ids == null || ids.isEmpty()) {</b>
+<b class="fc">&nbsp;            throw new RuntimeException(&quot;请选择要审批的申请&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        for (Long id : ids) {</b>
+<b class="fc">&nbsp;            doApprove(id, true, null);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    public void reject(ApprovalRequest request) {
+&nbsp;        // 参数校验
+<b class="pc">&nbsp;        if (request.getApplicationId() == null &amp;&amp;</b>
+<b class="nc">&nbsp;                (request.getApplicationIds() == null || request.getApplicationIds().isEmpty()) &amp;&amp;</b>
+<b class="nc">&nbsp;                !Boolean.TRUE.equals(request.getSelectAll())) {</b>
+<b class="nc">&nbsp;            throw new RuntimeException(&quot;请选择要审批的申请&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        if (!StringUtils.hasText(request.getRejectReason())) {</b>
+<b class="fc">&nbsp;            throw new RuntimeException(&quot;请填写拒绝原因&quot;);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // 单个拒绝
+<b class="pc">&nbsp;        if (request.getApplicationId() != null) {</b>
+<b class="fc">&nbsp;            doApprove(request.getApplicationId(), false, request.getRejectReason());</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;
+&nbsp;        // 批量拒绝
+<b class="nc">&nbsp;        List&lt;Long&gt; ids = getApplicationIds(request);</b>
+<b class="nc">&nbsp;        if (ids == null || ids.isEmpty()) {</b>
+<b class="nc">&nbsp;            throw new RuntimeException(&quot;请选择要审批的申请&quot;);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        for (Long id : ids) {</b>
+<b class="nc">&nbsp;            doApprove(id, false, request.getRejectReason());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    public void batchReject(ApprovalRequest request) {
+<b class="nc">&nbsp;        List&lt;Long&gt; ids = getApplicationIds(request);</b>
+<b class="nc">&nbsp;        if (ids == null || ids.isEmpty()) {</b>
+<b class="nc">&nbsp;            throw new RuntimeException(&quot;请选择要审批的申请&quot;);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (!StringUtils.hasText(request.getRejectReason())) {</b>
+<b class="nc">&nbsp;            throw new RuntimeException(&quot;请填写拒绝原因&quot;);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        for (Long id : ids) {</b>
+<b class="nc">&nbsp;            doApprove(id, false, request.getRejectReason());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void doApprove(Long applicationId, boolean approved, String rejectReason) {
+<b class="fc">&nbsp;        Long approverId = UserContextHolder.getCurrentUserId();</b>
+<b class="fc">&nbsp;        String approverName = UserContextHolder.getCurrentUsername();</b>
+&nbsp;
+<b class="fc">&nbsp;        JobApplication application = jobApplicationMapper.selectById(applicationId);</b>
+<b class="pc">&nbsp;        if (application == null) {</b>
+<b class="nc">&nbsp;            throw new RuntimeException(&quot;申请记录不存在&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        if (application.getStatus() != 0) {</b>
+<b class="fc">&nbsp;            throw new RuntimeException(&quot;该申请已被处理&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (!application.getApproverId().equals(approverId)) {</b>
+<b class="fc">&nbsp;            throw new RuntimeException(&quot;您无权审批该申请&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        application.setStatus(approved ? 1 : 2);</b>
+<b class="fc">&nbsp;        application.setApproveTime(LocalDateTime.now());</b>
+<b class="fc">&nbsp;        if (!approved) {</b>
+<b class="fc">&nbsp;            application.setRejectReason(rejectReason);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        jobApplicationMapper.updateById(application);</b>
+&nbsp;
+&nbsp;        // 发送通知
+<b class="fc">&nbsp;        User applicant = userMapper.selectById(application.getApplicantId());</b>
+<b class="fc">&nbsp;        ApprovalNotificationMessage notification = ApprovalNotificationMessage.builder()</b>
+<b class="fc">&nbsp;                .applicationId(applicationId)</b>
+<b class="fc">&nbsp;                .approverId(approverId)</b>
+<b class="fc">&nbsp;                .approverName(approverName)</b>
+<b class="fc">&nbsp;                .applicantId(application.getApplicantId())</b>
+<b class="pc">&nbsp;                .applicantName(applicant != null ? applicant.getUsername() : &quot;未知&quot;)</b>
+<b class="fc">&nbsp;                .reason(application.getReason())</b>
+<b class="fc">&nbsp;                .applyTime(application.getApplyTime())</b>
+<b class="fc">&nbsp;                .messageType(approved ? &quot;APPROVED&quot; : &quot;REJECTED&quot;)</b>
+<b class="fc">&nbsp;                .rejectReason(rejectReason)</b>
+<b class="fc">&nbsp;                .build();</b>
+<b class="fc">&nbsp;        notificationService.sendApprovalNotification(notification);</b>
+&nbsp;
+<b class="fc">&nbsp;        log.info(&quot;审批完成: {} -&gt; {}&quot;, applicationId, approved ? &quot;通过&quot; : &quot;拒绝&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;Long&gt; getApplicationIds(ApprovalRequest request) {
+<b class="pc">&nbsp;        if (Boolean.TRUE.equals(request.getSelectAll())) {</b>
+<b class="nc">&nbsp;            Long currentUserId = UserContextHolder.getCurrentUserId();</b>
+<b class="nc">&nbsp;            List&lt;JobApplication&gt; pendingList = jobApplicationMapper.selectPendingByApproverId(currentUserId);</b>
+<b class="nc">&nbsp;            return pendingList.stream().map(JobApplication::getId).collect(Collectors.toList());</b>
+&nbsp;        }
+<b class="pc">&nbsp;        if (request.getApplicationIds() != null &amp;&amp; !request.getApplicationIds().isEmpty()) {</b>
+<b class="fc">&nbsp;            return request.getApplicationIds();</b>
+&nbsp;        }
+<b class="pc">&nbsp;        if (request.getApplicationId() != null) {</b>
+<b class="nc">&nbsp;            return List.of(request.getApplicationId());</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 转换为审批响应对象
+&nbsp;     */
+&nbsp;    private ApprovalResponse convertToResponse(JobApplication application) {
+<b class="fc">&nbsp;        User applicant = userMapper.selectById(application.getApplicantId());</b>
+<b class="pc">&nbsp;        String applicantName = applicant != null ?</b>
+<b class="pc">&nbsp;                (applicant.getRealName() != null ? applicant.getRealName() : applicant.getUsername()) : &quot;未知&quot;;</b>
+&nbsp;
+<b class="fc">&nbsp;        return ApprovalResponse.builder()</b>
+<b class="fc">&nbsp;                .id(application.getId())</b>
+<b class="fc">&nbsp;                .applicantName(applicantName)</b>
+<b class="fc">&nbsp;                .reason(application.getReason())</b>
+<b class="fc">&nbsp;                .applyTime(application.getApplyTime())</b>
+<b class="fc">&nbsp;                .status(application.getStatus())</b>
+<b class="fc">&nbsp;                .build();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-06-15 16:56</div>
+</div>
+</body>
+</html>
