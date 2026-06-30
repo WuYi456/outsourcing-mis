@@ -87,3 +87,45 @@ management:
   health:
     elasticsearch:
       enabled: false
+
+# 日志配置
+logging:
+  level:
+    root: INFO
+    com.tx.outsourcingmis: INFO
+    org.springframework.web: INFO
+    org.springframework.security: INFO
+    org.mybatis: DEBUG
+    com.baomidou.mybatisplus: DEBUG
+  file:
+    name: logs/outsourcing-mis.log
+    max-size: 100MB
+    max-history: 7
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  logback:
+    rollingpolicy:
+      max-history: 7
+      max-file-size: 100MB
+      total-size-cap: 1GB
+
+# ELK 配置
+elk:
+  enabled: true
+  logstash:
+    host: localhost
+    port: 5044
+  elasticsearch:
+    host: localhost
+    port: 9200
+  index:
+    name: outsourcing-mis-logs
+    pattern: "yyyy-MM-dd"
+
+
+# 应用配置
+app:
+  name: outsourcing-mis
+  version: 1.0.0
+  environment: dev
